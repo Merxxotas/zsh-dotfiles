@@ -12,9 +12,9 @@ _zplugin_load() {
 
   if [[ ! -d "$plugin_path" ]]; then
     mkdir -p "$ZPLUGINDIR"
-    echo "⚡ Instalando plugin ${name}..."
+    echo "[INFO] Installing plugin ${name}..."
     git clone --depth=1 --recurse-submodules --shallow-submodules "https://github.com/${repo}/${name}" "$plugin_path" \
-      || { echo "❌ ERROR: No se pudo instalar ${name}" >&2; return 1; }
+      || { echo "[ERROR] Failed to install ${name}" >&2; return 1; }
   fi
 
   if [[ -f "${plugin_path}/${plugin_file}" ]]; then
@@ -29,12 +29,12 @@ _zplugin_load() {
 zplugin-update() {
   local dir
   for dir in "${ZPLUGINDIR}"/*/; do
-    echo "🔄 Actualizando ${dir:t}..."
+    echo "[INFO] Updating ${dir:t}..."
     git -C "$dir" pull --ff-only && git -C "$dir" submodule update --init --recursive
   done
 }
 
-# Plugins del Super Perfil
+# Core Plugins
 _zplugin_load zsh-users zsh-autosuggestions
 _zplugin_load zsh-users zsh-history-substring-search
 _zplugin_load jeffreytse zsh-vi-mode

@@ -1,122 +1,126 @@
-# 🧪 Casos de Prueba: Guía Completa del "Super Perfil" ZSH Universal
+# Verification and Test Scenarios
 
-Esta guía detalla los escenarios de prueba para validar cada una de las funcionalidades avanzadas implementadas en tu perfil de ZSH.
-
----
-
-### 🌟 Escenario 1: `FZF-Tab` con Previews Flotantes Dinámicos
-*El autocompletado tradicional con `Tab` ahora es un menú interactivo emergente con vista previa.*
-
-1. **Preview de Procesos (`kill` / `pkill`)**:
-   * Escribe: `kill ` *(con un espacio)* y presiona <kbd>Tab</kbd>.
-   * **Resultado**: Aparece una ventana flotante mostrando los procesos activos con su PID, consumo de CPU, memoria y comando completo. Puedes escribir para filtrar y presionar <kbd>Enter</kbd> para seleccionar el PID.
-2. **Preview de Directorios con árbol e iconos (`cd` / `z`)**:
-   * Escribe: `cd ` y presiona <kbd>Tab</kbd>.
-   * **Resultado**: Al moverte por las carpetas, verás a la derecha el árbol con iconos (`eza --tree`) del contenido interno de cada directorio.
-3. **Preview de Archivos con resaltado de sintaxis (`nvim` / `bat` / `cat`)**:
-   * Escribe: `bat ` o `nvim ` y presiona <kbd>Tab</kbd>.
-   * **Resultado**: Se abre una vista previa en tiempo real mostrando el contenido del archivo con números de línea y colores.
-4. **Preview de Variables de Entorno**:
-   * Escribe: `echo $` y presiona <kbd>Tab</kbd>.
-   * **Resultado**: Al navegar por las variables (`PATH`, `USER`, `EDITOR`), verás su valor actual a la derecha.
-5. **Preview de Git (`git checkout` / `git log`)**:
-   * Dentro de cualquier repositorio Git, escribe: `git checkout ` y presiona <kbd>Tab</kbd>.
-   * **Resultado**: Verás el historial de commits y el grafo de cada rama antes de cambiarte a ella.
+Technical verification suite for validating features and functionality of the ZSH Dotfiles configuration.
 
 ---
 
-### 🎨 Escenario 2: Selector de Temas de Oh-My-Posh (`posh-theme`)
-*Cambio dinámico y descarga automática de temas oficiales.*
+### Scenario 1: FZF-Tab Interactive Completion Previews
+*Objective: Verify contextual preview rendering upon Tab trigger.*
 
-1. **Selector Interactivo**:
-   * Escribe: `posh-theme` y presiona <kbd>Enter</kbd>.
-   * **Resultado**: Se abre un popup interactivo de FZF con temas populares (`clean-detailed`, `tokyo`, `catppuccin`, `dracula`, `agnoster`, `space`, etc.). Selecciona uno y el prompt se actualizará inmediatamente sin reiniciar la terminal.
-2. **Cambio Directo**:
-   * Escribe: `posh-theme catppuccin`
-   * **Resultado**: Descarga el tema si no existe en local, elimina el transient_prompt molesto y lo activa al instante.
-3. **Volver al tema principal**:
-   * Escribe: `posh-theme clean-detailed`
-
----
-
-### ⚡ Escenario 3: Abreviaciones en Tiempo Real (Estilo Fish)
-*Las abreviaciones se expanden visualmente en la línea al presionar espacio, guardando el comando completo en tu historial.*
-
-1. Escribe `gs` y presiona <kbd>Espacio</kbd> ➔ Se expande inmediatamente a `git status -s`.
-2. Escribe `lg` y presiona <kbd>Espacio</kbd> ➔ Se expande inmediatamente a `lazygit`.
-3. Escribe `gco` y presiona <kbd>Espacio</kbd> ➔ Se expande a `git checkout`.
-4. Escribe `gaa` y presiona <kbd>Espacio</kbd> ➔ Se expande a `git add --all`.
-5. Escribe `pac` y presiona <kbd>Espacio</kbd> ➔ Se expande a `sudo pacman -S`.
-6. Escribe `sc` y presiona <kbd>Espacio</kbd> ➔ Se expande a `sudo systemctl`.
+1. **Process Inspection**:
+   - Command: `kill ` (with trailing space) + press `Tab`.
+   - Acceptance Criteria: Interactive FZF popup appears containing active processes with PID, CPU, Memory, and command line.
+2. **Directory Tree Inspection**:
+   - Command: `cd ` + press `Tab`.
+   - Acceptance Criteria: Interactive popup displays real-time directory tree structure generated via `eza`.
+3. **Syntax Highlighted File Preview**:
+   - Command: `bat ` or `nvim ` + press `Tab`.
+   - Acceptance Criteria: Preview pane renders file contents with line numbering and syntax highlighting.
+4. **Environment Variable Inspection**:
+   - Command: `echo $` + press `Tab`.
+   - Acceptance Criteria: Values of environment variables are displayed in the preview pane.
+5. **Git Branch and Log Preview**:
+   - Command (inside a Git repository): `git checkout ` + press `Tab`.
+   - Acceptance Criteria: Commit logs and graph for available branches are rendered in the preview pane.
 
 ---
 
-### 🪄 Escenario 4: Magic Sudo (<kbd>Alt</kbd> + <kbd>S</kbd>)
-*Evita tener que navegar al principio de la línea o usar `sudo !!` cuando olvidas permisos de administrador.*
+### Scenario 2: Oh-My-Posh Theme Management (`posh-theme`)
+*Objective: Verify dynamic theme switching, remote downloads, and persistence.*
 
-1. Escribe cualquier comando que requiera root: `pacman -Syu` o `apt update` *(no presiones Enter)*.
-2. Presiona <kbd>Alt</kbd> + <kbd>s</kbd>.
-3. **Resultado**: La línea se convierte instantáneamente en `sudo pacman -Syu`. Si vuelves a presionar <kbd>Alt</kbd> + <kbd>s</kbd>, quita el `sudo`.
-
----
-
-### 💡 Escenario 5: Asistente Didáctico (`You-Should-Use`)
-*Entrena tu memoria muscular cuando escribes comandos largos teniendo un alias disponible.*
-
-1. Dentro de cualquier repositorio Git, escribe manualmente: `git status -s` y presiona <kbd>Enter</kbd>.
-2. **Resultado**: Además de ejecutar el comando, Zsh te mostrará un aviso didáctico:
-   `💡 Found existing alias: 'gs'`
-
----
-
-### 📜 Escenario 6: Atuin (Historial Mágico y Búsqueda Interactiva)
-*Tu motor Atuin sincronizado y con interfaz TUI completa.*
-
-1. **Búsqueda Atuin**: Presiona <kbd>Ctrl</kbd> + <kbd>R</kbd> o <kbd>↑</kbd> (Flecha Arriba).
-2. **Resultado**: Se abre la interfaz interactiva de **Atuin**, mostrando historial con fecha/hora relativa, duración de ejecución, código de salida, directorio y host.
-3. Puedes presionar <kbd>Tab</kbd> dentro de Atuin para cambiar el modo de filtro (Global / Host / Directorio actual / Sesión).
+1. **Interactive Selection**:
+   - Command: `posh-theme`
+   - Acceptance Criteria: FZF selection menu displays available local and popular official themes.
+2. **Direct Activation**:
+   - Command: `posh-theme catppuccin`
+   - Acceptance Criteria: Theme is downloaded from GitHub, stripped of layout-shifting transient prompts, and applied immediately.
+3. **Persistence Verification**:
+   - Command: `cat ~/.config/zsh/current_theme`
+   - Acceptance Criteria: File contains `catppuccin` and persists across new shell sessions.
+4. **Reset to Default**:
+   - Command: `posh-theme clean-detailed`
 
 ---
 
-### 🔒 Escenario 7: Autopair Inteligente
-*Gestión automática de comillas y paréntesis.*
+### Scenario 3: Real-Time Abbreviations (`zsh-abbr`)
+*Objective: Verify expansion behavior and explicit history persistence.*
 
-1. Escribe `"` ➔ Automáticamente se escribe `""` con el cursor en medio.
-2. Escribe texto dentro y luego vuelve a presionar `"` ➔ En lugar de duplicar la comilla, **salta hacia afuera**.
-3. Si estás dentro de un par vacío `()` o `""` y presionas <kbd>Backspace</kbd> ➔ Borra ambos caracteres al mismo tiempo.
-
----
-
-### ✏️ Escenario 8: Vi-Mode con Cursores Vivos
-*Edición modal estilo Neovim directamente en tu prompt.*
-
-1. Al escribir normalmente, observa que el cursor es una **barra vertical (`|`)** (Modo inserción).
-2. Presiona la tecla <kbd>Esc</kbd> ➔ El cursor cambia a un **bloque sólido (`█`)** (Modo normal de Vim).
-3. En modo normal puedes usar comandos de Vim como `b` (palabra atrás), `w` (palabra adelante), `dd` (borrar línea) o `ciw` (cambiar palabra).
-4. Presiona `i` para volver al modo inserción y el cursor regresará a la barra `|`.
+1. Type `gs` and press `Space` -> Expands to `git status -s`.
+2. Type `lg` and press `Space` -> Expands to `lazygit`.
+3. Type `gco` and press `Space` -> Expands to `git checkout`.
+4. Type `gaa` and press `Space` -> Expands to `git add --all`.
+5. Type `pac` and press `Space` -> Expands to `sudo pacman -S`.
+6. Type `sc` and press `Space` -> Expands to `sudo systemctl`.
 
 ---
 
-### 🧰 Escenario 9: Super Helpers (`take` y `extract`)
+### Scenario 4: Magic Sudo (`Alt+S`)
+*Objective: Validate prefixing and removing sudo dynamically.*
 
-1. **Helper `take`**:
-   * Ejecuta: `take /tmp/prueba_super_perfil/subdirectorio`
-   * **Resultado**: Crea toda la estructura de carpetas (`mkdir -p`) y entra directamente en ella (`cd`).
-2. **Helper `extract`**:
-   * Ejecuta `extract archivo.tar.gz` o `extract archivo.zip`
-   * **Resultado**: Descomprime automáticamente cualquier formato (`tar`, `gz`, `bz2`, `zip`, `7z`, `rar`, `zst`) sin necesidad de memorizar banderas como `-xvzf`.
+1. Type: `pacman -Syu` or `apt update` (do not press Enter).
+2. Press `Alt + S`.
+3. Acceptance Criteria: Buffer is transformed to `sudo pacman -Syu`. Pressing `Alt + S` again removes the `sudo ` prefix.
 
 ---
 
-### 🔍 Escenario 10: Selector de Archivos FZF con Preview `bat`
+### Scenario 5: Didactic Alias Reminder (`zsh-you-should-use`)
+*Objective: Verify suggestions when explicit long commands are typed.*
 
-1. **Selector de archivos limpios**: Presiona <kbd>Ctrl</kbd> + <kbd>F</kbd> para buscar archivos en el directorio actual (excluyendo archivos ocultos y carpetas `.git`) con vista previa en tiempo real con `bat`.
-2. **Selector completo**: Presiona <kbd>Ctrl</kbd> + <kbd>T</kbd> para buscar entre todos los archivos.
+1. Inside a Git repository, type: `git status -s` and press `Enter`.
+2. Acceptance Criteria: Execution completes and an inline reminder is printed: `Found existing alias: 'gs'`.
 
 ---
 
-### 🔄 Escenario 11: Actualizaciones en un solo comando
-*Para actualizar todos los plugins del Super Perfil a sus últimas versiones de GitHub:*
+### Scenario 6: Atuin History and TUI Exploration
+*Objective: Validate shell history retrieval and interactive search.*
 
-* Ejecuta: `zplugin-update`
-* **Resultado**: Actualiza automáticamente todos los repositorios en `~/.config/zsh/plugins/` en paralelo con `git pull --ff-only`.
+1. Press `Ctrl + R` or `Up Arrow`.
+2. Acceptance Criteria: Atuin interactive TUI opens, displaying execution history, duration, exit code, and timestamps.
+3. Press `Tab` inside Atuin to toggle filter modes (Global, Host, Directory, Session).
+
+---
+
+### Scenario 7: Autopair Execution
+*Objective: Validate automatic matching and deletion of paired delimiters.*
+
+1. Type `"` -> Line buffer contains `""` with cursor positioned between quotes.
+2. Type internal text and type `"` again -> Cursor jumps over the closing quote.
+3. With cursor between empty delimiters `""` or `()`, press `Backspace` -> Both characters are removed.
+
+---
+
+### Scenario 8: Vi-Mode and Cursor States
+*Objective: Validate modal editing and cursor geometry.*
+
+1. Type in command buffer -> Cursor is displayed as a vertical beam (`|`).
+2. Press `Esc` -> Cursor switches to solid block (`█`).
+3. Press `b`, `w`, `dd` to perform standard Vi movements/edits.
+4. Press `i` -> Cursor returns to vertical beam (`|`).
+
+---
+
+### Scenario 9: Universal Helpers (`take` and `extract`)
+*Objective: Verify helper functions.*
+
+1. Directory traversal:
+   - Command: `take /tmp/test_dir/nested`
+   - Acceptance Criteria: Directory hierarchy is created and current working directory switches to `/tmp/test_dir/nested`.
+2. Archive extraction:
+   - Command: `extract archive.tar.gz` or `extract archive.zip`
+   - Acceptance Criteria: Target archive is extracted using appropriate binary without flags.
+
+---
+
+### Scenario 10: Fuzzy File Finders
+*Objective: Validate FZF integration.*
+
+1. Press `Ctrl + F` -> Launches file search excluding hidden files with bat preview.
+2. Press `Ctrl + T` -> Launches comprehensive file search with bat preview.
+
+---
+
+### Scenario 11: Plugin Updates
+*Objective: Verify parallel Git plugin update mechanism.*
+
+1. Command: `zplugin-update`
+2. Acceptance Criteria: All Git repositories located in `~/.config/zsh/plugins/` are pulled using `--ff-only`.

@@ -1,0 +1,45 @@
+name: CI - Arch, Fedora & openSUSE
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test on ${{ matrix.distro }}
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.distro }}
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - 'archlinux:latest'
+          - 'fedora:latest'
+          - 'opensuse/tumbleweed:latest'
+    steps:
+      - name: Install bootstrap dependencies
+        run: |
+          if command -v pacman >/dev/null 2>&1; then
+            pacman -Syu --noconfirm --needed sudo curl git zsh
+          elif command -v dnf >/dev/null 2>&1; then
+            dnf install -y sudo curl git zsh util-linux
+          elif command -v zypper >/dev/null 2>&1; then
+            zypper --non-interactive install sudo curl git zsh
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run unattended installation
+        run: ./install.sh -y
+
+      - name: Verify ZSH initialization
+        run: zsh -i -c "echo 'ZSH Initialized Successfully'"
+
+      - name: Verify aliases, helpers and environment
+        run: |
+          zsh -i -c "which take extract ls ll"
+          zsh -i -c "posh-theme clean-detailed && cat ~/.config/zsh/current_theme"
