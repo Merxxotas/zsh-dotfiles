@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     name: Test on ${{ matrix.distro }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: ${{ matrix.distro }}
     strategy:
