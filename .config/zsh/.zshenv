@@ -2,6 +2,11 @@
 # ~/.config/zsh/.zshenv - Universal Environment & PATH
 # =========================================================
 
+# Fallback universal para TERM (resuelve duplicación de caracteres en Ghostty / Kitty sobre SSH)
+if ! infocmp "$TERM" >/dev/null 2>&1; then
+  export TERM="xterm-256color"
+fi
+
 # XDG Base Directories
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_CACHE_HOME="$HOME/.cache"
