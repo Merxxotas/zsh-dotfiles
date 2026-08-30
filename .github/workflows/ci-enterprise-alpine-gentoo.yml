@@ -16,10 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - 'rockylinux:9'
-          - 'almalinux:9'
-          - 'alpine:latest'
-          - 'gentoo/stage3:latest'
+          - 'rockylinux:9.4'
+          - 'almalinux:9.4'
+          - 'alpine:3.21'
+          - 'alpine:3.20'
+          - 'gentoo/stage3:openrc'
     steps:
       - name: Install bootstrap dependencies
         run: |

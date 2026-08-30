@@ -18,8 +18,8 @@ jobs:
         distro:
           - 'ubuntu:24.04'
           - 'ubuntu:22.04'
-          - 'debian:bookworm'
-          - 'debian:trixie'
+          - 'debian:12-slim'
+          - 'debian:11-slim'
     steps:
       - name: Install bootstrap dependencies
         run: |
