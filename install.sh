@@ -206,7 +206,7 @@ if [[ "$CURRENT_SHELL" != "zsh" && "$UNATTENDED" != "true" ]]; then
   read -r -p "[PROMPT] Set ZSH as your default login shell? (Y/n): " change_shell
   if [[ ! "$change_shell" =~ ^[nN]$ ]]; then
     ZSH_PATH="$(which zsh)"
-    chsh -s "$ZSH_PATH" 2>/dev/null || run_sudo chsh -s "$ZSH_PATH" "$USER" 2>/dev/null || true
+    run_sudo chsh -s "$ZSH_PATH" "$USER" 2>/dev/null || run_sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
     echo -e "  ${GREEN}[OK]${NC} Default shell changed to $ZSH_PATH."
   fi
 fi
