@@ -1,0 +1,16 @@
+# Runtime downloaded plugins (auto-cloned on first run)
+.config/zsh/plugins/
+plugins/
+
+# Cache, compdump & temporary files
+.config/zsh/.zcompdump*
+.zcompdump*
+.cache/
+*.swp
+*.tmp
+*~
+
+# History & state
+.local/
+history
+*.log
