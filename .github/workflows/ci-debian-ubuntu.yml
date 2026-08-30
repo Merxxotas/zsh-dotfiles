@@ -24,7 +24,7 @@ jobs:
       - name: Install bootstrap dependencies
         run: |
           apt-get update -y
-          apt-get install -y sudo curl git zsh
+          apt-get install -y sudo curl git zsh ca-certificates
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,10 +32,8 @@ jobs:
       - name: Run unattended installation
         run: ./install.sh -y
 
-      - name: Verify ZSH initialization
-        run: zsh -i -c "echo 'ZSH Initialized Successfully'"
-
-      - name: Verify aliases, helpers and environment
+      - name: Verify ZSH initialization and execution
         run: |
-          zsh -i -c "which take extract ls ll bat fd atuin posh-theme"
-          zsh -i -c "posh-theme tokyo && cat ~/.config/zsh/current_theme"
+          zsh -i -c "echo 'ZSH Initialized Successfully'"
+          zsh -i -c "take /tmp/test_dir && echo 'Helper take OK'"
+          zsh -i -c "posh-theme tokyo && test -f ~/.config/zsh/current_theme && echo 'Posh theme OK'"

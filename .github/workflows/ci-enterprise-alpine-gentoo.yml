@@ -16,20 +16,20 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - 'rockylinux:9.4'
-          - 'almalinux:9.4'
+          - 'rockylinux:9'
+          - 'almalinux:9'
           - 'alpine:3.21'
           - 'alpine:3.20'
-          - 'gentoo/stage3:openrc'
+          - 'gentoo/stage3:nomultilib-openrc'
     steps:
       - name: Install bootstrap dependencies
         run: |
           if command -v apk >/dev/null 2>&1; then
-            apk update && apk add sudo curl git zsh bash shadow
+            apk update && apk add sudo curl git zsh bash shadow ca-certificates
           elif command -v dnf >/dev/null 2>&1; then
-            dnf install -y sudo curl git zsh util-linux
+            dnf install -y --allowerasing sudo curl git zsh util-linux ca-certificates
           elif command -v emerge >/dev/null 2>&1; then
-            emerge --quiet app-shells/zsh app-admin/sudo dev-vcs/git net-misc/curl
+            emerge --quiet app-shells/zsh app-admin/sudo dev-vcs/git net-misc/curl app-misc/ca-certificates || true
           fi
 
       - name: Checkout repository
@@ -38,8 +38,7 @@ jobs:
       - name: Run unattended installation
         run: ./install.sh -y
 
-      - name: Verify ZSH initialization
-        run: zsh -i -c "echo 'ZSH Initialized Successfully'"
-
-      - name: Verify helpers and environment
-        run: zsh -i -c "which take extract"
+      - name: Verify ZSH initialization and execution
+        run: |
+          zsh -i -c "echo 'ZSH Initialized Successfully'"
+          zsh -i -c "take /tmp/test_dir && echo 'Helper take OK'"

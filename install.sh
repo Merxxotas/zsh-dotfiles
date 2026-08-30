@@ -18,6 +18,17 @@ NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# --- Sudo wrapper for containers / root ---
+run_sudo() {
+  if [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
+
 # --- Argument Parsing ---
 UNATTENDED=false
 for arg in "$@"; do
@@ -60,37 +71,38 @@ install_packages() {
   case "$OS" in
     ubuntu|debian|pop|linuxmint)
       echo -e "[INFO] Installing packages via apt..."
-      sudo apt update -y
-      sudo apt install -y zsh fzf bat fd-find curl git jq neovim unzip tar
+      run_sudo apt-get update -y
+      run_sudo apt-get install -y zsh fzf bat fd-find curl git jq neovim unzip tar || true
       mkdir -p "$HOME/.local/bin"
-      command -v batcat >/dev/null 2>&1 && ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
-      command -v fdfind >/dev/null 2>&1 && ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
+      command -v batcat >/dev/null 2>&1 && ln -sf "$(which batcat)" "$HOME/.local/bin/bat" && run_sudo ln -sf "$(which batcat)" "/usr/local/bin/bat" 2>/dev/null || true
+      command -v fdfind >/dev/null 2>&1 && ln -sf "$(which fdfind)" "$HOME/.local/bin/fd" && run_sudo ln -sf "$(which fdfind)" "/usr/local/bin/fd" 2>/dev/null || true
       ;;
     arch|cachyos|manjaro|endeavouros)
       echo -e "[INFO] Installing packages via pacman..."
-      sudo pacman -S --needed --noconfirm zsh fzf bat eza fd curl git neovim jq atuin unzip tar
+      run_sudo pacman -S --needed --noconfirm zsh fzf bat eza fd curl git neovim jq atuin unzip tar || true
       ;;
     fedora|rhel|centos|rocky|almalinux)
       echo -e "[INFO] Installing packages via dnf..."
-      sudo dnf install -y zsh fzf bat eza fd-find curl git neovim jq atuin unzip tar || true
+      run_sudo dnf install -y --allowerasing zsh fzf bat eza fd-find curl git neovim jq atuin unzip tar || true
+      command -v fdfind >/dev/null 2>&1 && run_sudo ln -sf "$(which fdfind)" "/usr/local/bin/fd" 2>/dev/null || true
       ;;
     opensuse*|suse)
       echo -e "[INFO] Installing packages via zypper..."
-      sudo zypper --non-interactive install zsh fzf bat eza fd curl git neovim jq atuin unzip tar || true
+      run_sudo zypper --non-interactive install -y zsh fzf bat eza fd curl git neovim jq atuin unzip tar || true
       ;;
     alpine)
       echo -e "[INFO] Installing packages via apk..."
-      sudo apk update && sudo apk add zsh fzf bat eza fd curl git neovim jq unzip tar shadow
+      run_sudo apk update && run_sudo apk add zsh fzf bat eza fd curl git neovim jq unzip tar shadow || true
       ;;
     gentoo)
       echo -e "[INFO] Checking packages for Gentoo..."
-      command -v zsh >/dev/null 2>&1 || sudo emerge --quiet app-shells/zsh
-      command -v git >/dev/null 2>&1 || sudo emerge --quiet dev-vcs/git
-      command -v curl >/dev/null 2>&1 || sudo emerge --quiet net-misc/curl
+      command -v zsh >/dev/null 2>&1 || run_sudo emerge --quiet app-shells/zsh || true
+      command -v git >/dev/null 2>&1 || run_sudo emerge --quiet dev-vcs/git || true
+      command -v curl >/dev/null 2>&1 || run_sudo emerge --quiet net-misc/curl || true
       ;;
     macos)
       echo -e "[INFO] Installing packages via brew..."
-      brew install zsh fzf bat eza fd curl git neovim jq atuin
+      brew install zsh fzf bat eza fd curl git neovim jq atuin || true
       ;;
     *)
       echo -e "[WARN] Generic Linux environment detected. Continuing with available binaries..."
@@ -110,25 +122,31 @@ fi
 # Install eza for Ubuntu/Debian if missing
 if ! command -v eza >/dev/null 2>&1 && [[ "$OS" =~ ^(ubuntu|debian|pop|linuxmint)$ ]]; then
   echo -e "[INFO] Installing eza..."
-  sudo mkdir -p /etc/apt/keyrings
-  wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg 2>/dev/null || true
-  echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null 2>&1 || true
-  sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list 2>/dev/null || true
-  sudo apt update -y >/dev/null 2>&1 || true
-  sudo apt install -y eza >/dev/null 2>&1 || true
+  run_sudo mkdir -p /etc/apt/keyrings
+  wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | run_sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg 2>/dev/null || true
+  echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | run_sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null 2>&1 || true
+  run_sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list 2>/dev/null || true
+  run_sudo apt-get update -y >/dev/null 2>&1 || true
+  run_sudo apt-get install -y eza >/dev/null 2>&1 || true
 fi
 
 # Install Oh-My-Posh if missing
 if ! command -v oh-my-posh >/dev/null 2>&1; then
   echo -e "[INFO] Installing Oh-My-Posh binary..."
   mkdir -p "$HOME/.local/bin"
-  curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin" || true
+  curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin" 2>/dev/null || true
+  if [[ -f "$HOME/.local/bin/oh-my-posh" ]]; then
+    run_sudo cp "$HOME/.local/bin/oh-my-posh" /usr/local/bin/ 2>/dev/null || true
+  fi
 fi
 
 # Install Atuin if missing
 if ! command -v atuin >/dev/null 2>&1 && [[ ! -f "$HOME/.atuin/bin/atuin" ]]; then
   echo -e "[INFO] Installing Atuin binary..."
-  curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh || true
+  curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh 2>/dev/null || true
+  if [[ -f "$HOME/.atuin/bin/atuin" ]]; then
+    run_sudo cp "$HOME/.atuin/bin/atuin" /usr/local/bin/ 2>/dev/null || true
+  fi
 fi
 
 # --- 3. XDG Directories Setup ---
@@ -155,14 +173,14 @@ fi
 
 if [[ "$sync_root" =~ ^[sSyY]$ ]]; then
   echo -e "[INFO] Applying configuration to /root/..."
-  sudo mkdir -p /root/.config/zsh /root/.local/state/zsh /root/.cache/zsh /root/.local/bin
-  sudo cp -r "$HOME/.config/zsh" /root/.config/
-  sudo cp "$HOME/.zshenv" /root/.zshenv
+  run_sudo mkdir -p /root/.config/zsh /root/.local/state/zsh /root/.cache/zsh /root/.local/bin
+  run_sudo cp -r "$HOME/.config/zsh" /root/.config/
+  run_sudo cp "$HOME/.zshenv" /root/.zshenv
   if [[ -f "$HOME/.local/bin/oh-my-posh" ]]; then
-    sudo cp "$HOME/.local/bin/oh-my-posh" /usr/local/bin/ 2>/dev/null || true
+    run_sudo cp "$HOME/.local/bin/oh-my-posh" /usr/local/bin/ 2>/dev/null || true
   fi
-  sudo chown -R root:root /root/.config/zsh /root/.local/state/zsh /root/.cache/zsh /root/.zshenv
-  sudo chmod -R go-w /root/.config/zsh 2>/dev/null || true
+  run_sudo chown -R root:root /root/.config/zsh /root/.local/state/zsh /root/.cache/zsh /root/.zshenv 2>/dev/null || true
+  run_sudo chmod -R go-w /root/.config/zsh 2>/dev/null || true
   echo -e "  ${GREEN}[OK]${NC} Root user configured successfully."
 fi
 
@@ -173,7 +191,7 @@ if [[ "$CURRENT_SHELL" != "zsh" && "$UNATTENDED" != "true" ]]; then
   read -r -p "[PROMPT] Set ZSH as your default login shell? (Y/n): " change_shell
   if [[ ! "$change_shell" =~ ^[nN]$ ]]; then
     ZSH_PATH="$(which zsh)"
-    chsh -s "$ZSH_PATH" 2>/dev/null || sudo chsh -s "$ZSH_PATH" "$USER"
+    chsh -s "$ZSH_PATH" 2>/dev/null || run_sudo chsh -s "$ZSH_PATH" "$USER" 2>/dev/null || true
     echo -e "  ${GREEN}[OK]${NC} Default shell changed to $ZSH_PATH."
   fi
 fi

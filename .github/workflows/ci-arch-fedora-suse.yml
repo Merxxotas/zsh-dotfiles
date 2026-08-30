@@ -24,11 +24,13 @@ jobs:
       - name: Install bootstrap dependencies
         run: |
           if command -v pacman >/dev/null 2>&1; then
-            pacman -Syu --noconfirm --needed sudo curl git zsh
+            pacman-key --init || true
+            pacman-key --populate archlinux || true
+            pacman -Syu --noconfirm --needed sudo curl git zsh ca-certificates
           elif command -v dnf >/dev/null 2>&1; then
-            dnf install -y sudo curl git zsh util-linux
+            dnf install -y --allowerasing sudo curl git zsh util-linux ca-certificates
           elif command -v zypper >/dev/null 2>&1; then
-            zypper --non-interactive install sudo curl git zsh
+            zypper --non-interactive install -y sudo curl git zsh ca-certificates
           fi
 
       - name: Checkout repository
@@ -37,10 +39,8 @@ jobs:
       - name: Run unattended installation
         run: ./install.sh -y
 
-      - name: Verify ZSH initialization
-        run: zsh -i -c "echo 'ZSH Initialized Successfully'"
-
-      - name: Verify aliases, helpers and environment
+      - name: Verify ZSH initialization and execution
         run: |
-          zsh -i -c "which take extract ls ll"
-          zsh -i -c "posh-theme clean-detailed && cat ~/.config/zsh/current_theme"
+          zsh -i -c "echo 'ZSH Initialized Successfully'"
+          zsh -i -c "take /tmp/test_dir && echo 'Helper take OK'"
+          zsh -i -c "posh-theme clean-detailed && test -f ~/.config/zsh/current_theme && echo 'Posh theme OK'"

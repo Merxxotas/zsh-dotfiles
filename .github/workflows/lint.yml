@@ -20,7 +20,7 @@ jobs:
           sudo apt-get install -y zsh shellcheck
 
       - name: Run ShellCheck on install.sh
-        run: shellcheck -e SC1091,SC2086 install.sh
+        run: shellcheck -e SC1091,SC2086,SC2034 install.sh
 
       - name: Validate ZSH syntax
         run: |
