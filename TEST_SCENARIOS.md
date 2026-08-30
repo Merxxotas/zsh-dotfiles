@@ -1,4 +1,4 @@
-# 🧪 Casos de Prueba: Guía Completa del "Super Perfil" ZSH
+# 🧪 Casos de Prueba: Guía Completa del "Super Perfil" ZSH Universal
 
 Esta guía detalla los escenarios de prueba para validar cada una de las funcionalidades avanzadas implementadas en tu perfil de ZSH.
 
@@ -25,7 +25,21 @@ Esta guía detalla los escenarios de prueba para validar cada una de las funcion
 
 ---
 
-### ⚡ Escenario 2: Abreviaciones en Tiempo Real (Estilo Fish)
+### 🎨 Escenario 2: Selector de Temas de Oh-My-Posh (`posh-theme`)
+*Cambio dinámico y descarga automática de temas oficiales.*
+
+1. **Selector Interactivo**:
+   * Escribe: `posh-theme` y presiona <kbd>Enter</kbd>.
+   * **Resultado**: Se abre un popup interactivo de FZF con temas populares (`clean-detailed`, `tokyo`, `catppuccin`, `dracula`, `agnoster`, `space`, etc.). Selecciona uno y el prompt se actualizará inmediatamente sin reiniciar la terminal.
+2. **Cambio Directo**:
+   * Escribe: `posh-theme catppuccin`
+   * **Resultado**: Descarga el tema si no existe en local, elimina el transient_prompt molesto y lo activa al instante.
+3. **Volver al tema principal**:
+   * Escribe: `posh-theme clean-detailed`
+
+---
+
+### ⚡ Escenario 3: Abreviaciones en Tiempo Real (Estilo Fish)
 *Las abreviaciones se expanden visualmente en la línea al presionar espacio, guardando el comando completo en tu historial.*
 
 1. Escribe `gs` y presiona <kbd>Espacio</kbd> ➔ Se expande inmediatamente a `git status -s`.
@@ -37,16 +51,16 @@ Esta guía detalla los escenarios de prueba para validar cada una de las funcion
 
 ---
 
-### 🪄 Escenario 3: Magic Sudo (<kbd>Alt</kbd> + <kbd>S</kbd>)
+### 🪄 Escenario 4: Magic Sudo (<kbd>Alt</kbd> + <kbd>S</kbd>)
 *Evita tener que navegar al principio de la línea o usar `sudo !!` cuando olvidas permisos de administrador.*
 
-1. Escribe cualquier comando que requiera root: `pacman -Syu` *(no presiones Enter)*.
+1. Escribe cualquier comando que requiera root: `pacman -Syu` o `apt update` *(no presiones Enter)*.
 2. Presiona <kbd>Alt</kbd> + <kbd>s</kbd>.
 3. **Resultado**: La línea se convierte instantáneamente en `sudo pacman -Syu`. Si vuelves a presionar <kbd>Alt</kbd> + <kbd>s</kbd>, quita el `sudo`.
 
 ---
 
-### 💡 Escenario 4: Asistente Didáctico (`You-Should-Use`)
+### 💡 Escenario 5: Asistente Didáctico (`You-Should-Use`)
 *Entrena tu memoria muscular cuando escribes comandos largos teniendo un alias disponible.*
 
 1. Dentro de cualquier repositorio Git, escribe manualmente: `git status -s` y presiona <kbd>Enter</kbd>.
@@ -55,7 +69,7 @@ Esta guía detalla los escenarios de prueba para validar cada una de las funcion
 
 ---
 
-### 📜 Escenario 5: Atuin (Historial Mágico y Búsqueda Interactiva)
+### 📜 Escenario 6: Atuin (Historial Mágico y Búsqueda Interactiva)
 *Tu motor Atuin sincronizado y con interfaz TUI completa.*
 
 1. **Búsqueda Atuin**: Presiona <kbd>Ctrl</kbd> + <kbd>R</kbd> o <kbd>↑</kbd> (Flecha Arriba).
@@ -64,7 +78,7 @@ Esta guía detalla los escenarios de prueba para validar cada una de las funcion
 
 ---
 
-### 🔒 Escenario 6: Autopair Inteligente
+### 🔒 Escenario 7: Autopair Inteligente
 *Gestión automática de comillas y paréntesis.*
 
 1. Escribe `"` ➔ Automáticamente se escribe `""` con el cursor en medio.
@@ -73,7 +87,7 @@ Esta guía detalla los escenarios de prueba para validar cada una de las funcion
 
 ---
 
-### ✏️ Escenario 7: Vi-Mode con Cursores Vivos
+### ✏️ Escenario 8: Vi-Mode con Cursores Vivos
 *Edición modal estilo Neovim directamente en tu prompt.*
 
 1. Al escribir normalmente, observa que el cursor es una **barra vertical (`|`)** (Modo inserción).
@@ -83,7 +97,7 @@ Esta guía detalla los escenarios de prueba para validar cada una de las funcion
 
 ---
 
-### 🧰 Escenario 8: Super Helpers (`take` y `extract`)
+### 🧰 Escenario 9: Super Helpers (`take` y `extract`)
 
 1. **Helper `take`**:
    * Ejecuta: `take /tmp/prueba_super_perfil/subdirectorio`
@@ -94,19 +108,10 @@ Esta guía detalla los escenarios de prueba para validar cada una de las funcion
 
 ---
 
-### 🔍 Escenario 9: Selector de Archivos FZF con Preview `bat`
+### 🔍 Escenario 10: Selector de Archivos FZF con Preview `bat`
 
 1. **Selector de archivos limpios**: Presiona <kbd>Ctrl</kbd> + <kbd>F</kbd> para buscar archivos en el directorio actual (excluyendo archivos ocultos y carpetas `.git`) con vista previa en tiempo real con `bat`.
 2. **Selector completo**: Presiona <kbd>Ctrl</kbd> + <kbd>T</kbd> para buscar entre todos los archivos.
-
----
-
-### 🎨 Escenario 10: Temas Oh-My-Posh (Opción A: Prompt Fijo y Sin Colapsos)
-
-1. **Usuario `merxx`**:
-   * Abre tu terminal: verás el tema **`clean-detailed`** local con iconos, tiempo de ejecución y estado git. Al presionar <kbd>Enter</kbd>, el prompt se mantiene completo y alineado.
-2. **Usuario `root`**:
-   * Ejecuta `sudo -i zsh`: verás el tema **`tokyo`** local con colores de superusuario y sin falsos avisos de error.
 
 ---
 

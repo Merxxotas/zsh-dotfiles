@@ -1,8 +1,21 @@
 # =========================================================
-# ~/.config/zsh/fzf.zsh - FZF Configuration
+# ~/.config/zsh/fzf.zsh - Universal FZF Configuration
 # =========================================================
 
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --strip-cwd-prefix --exclude .git'
+# Detección de fd / fdfind (Ubuntu)
+if command -v fd >/dev/null 2>&1; then
+  export FZF_FD_CMD="fd"
+elif command -v fdfind >/dev/null 2>&1; then
+  export FZF_FD_CMD="fdfind"
+else
+  export FZF_FD_CMD="find"
+fi
+
+if [[ "$FZF_FD_CMD" != "find" ]]; then
+  export FZF_DEFAULT_COMMAND="$FZF_FD_CMD --type f --hidden --strip-cwd-prefix --exclude .git"
+else
+  export FZF_DEFAULT_COMMAND="find . -type f"
+fi
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 export FZF_DEFAULT_OPTS='
@@ -14,13 +27,24 @@ export FZF_DEFAULT_OPTS='
   --preview-window=right:65%:wrap:border-left
 '
 
-export _FZF_PREVIEW_CMD='bat --color=always --style=plain,numbers --line-range=:500 {}'
+# Preview command con bat o batcat
+if command -v bat >/dev/null 2>&1; then
+  export _FZF_PREVIEW_CMD='bat --color=always --style=plain,numbers --line-range=:500 {}'
+elif command -v batcat >/dev/null 2>&1; then
+  export _FZF_PREVIEW_CMD='batcat --color=always --style=plain,numbers --line-range=:500 {}'
+else
+  export _FZF_PREVIEW_CMD='cat {}'
+fi
 export FZF_CTRL_T_OPTS="--preview '$_FZF_PREVIEW_CMD'"
 
 _fzf_file_no_hidden() {
   local cmd result
-  cmd="fd --type f --strip-cwd-prefix --exclude .git"
-  result=$(eval "${cmd:-find . -type f}" | fzf --preview "$_FZF_PREVIEW_CMD") \
+  if [[ "$FZF_FD_CMD" != "find" ]]; then
+    cmd="$FZF_FD_CMD --type f --strip-cwd-prefix --exclude .git"
+  else
+    cmd="find . -type f -not -path '*/.*'"
+  fi
+  result=$(eval "$cmd" | fzf --preview "$_FZF_PREVIEW_CMD") \
     && LBUFFER+="$result"
   zle reset-prompt
 }

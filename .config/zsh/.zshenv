@@ -1,5 +1,5 @@
 # =========================================================
-# ~/.config/zsh/.zshenv - Environment & PATH
+# ~/.config/zsh/.zshenv - Universal Environment & PATH
 # =========================================================
 
 # XDG Base Directories
@@ -12,7 +12,7 @@ export XDG_STATE_HOME="$HOME/.local/state"
 export EDITOR="nvim"
 export VISUAL="nvim"
 
-# Pager con bat
+# Pager con bat / batcat (compatibilidad Ubuntu/Debian)
 if command -v bat >/dev/null 2>&1; then
   export MANPAGER="bat -l man -p"
 elif command -v batcat >/dev/null 2>&1; then
@@ -22,16 +22,8 @@ fi
 # GPG
 export GPG_TTY=$(tty)
 
-# Atuin env & PATH (soporte para usuario actual y fallback a /home/merxx/.atuin/bin)
-if [ -f "$HOME/.atuin/bin/env" ]; then
-  . "$HOME/.atuin/bin/env"
-elif [ -d "/home/merxx/.atuin/bin" ]; then
-  export PATH="/home/merxx/.atuin/bin:$PATH"
-fi
-[ -d "$HOME/.atuin/bin" ] && export PATH="$HOME/.atuin/bin:$PATH"
-
-# PATH Consolidado
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+# PATH Consolidado y Universal
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.atuin/bin:$PATH"
 
 # Bun & PNPM
 export BUN_INSTALL="$HOME/.bun"
