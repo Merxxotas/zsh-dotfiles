@@ -71,11 +71,17 @@ install_packages() {
   case "$OS" in
     ubuntu|debian|pop|linuxmint)
       echo -e "[INFO] Installing packages via apt..."
-      run_sudo apt-get update -y
+      run_sudo apt-get update -y || true
       run_sudo apt-get install -y zsh fzf bat fd-find curl git jq neovim unzip tar || true
       mkdir -p "$HOME/.local/bin"
-      command -v batcat >/dev/null 2>&1 && ln -sf "$(which batcat)" "$HOME/.local/bin/bat" && run_sudo ln -sf "$(which batcat)" "/usr/local/bin/bat" 2>/dev/null || true
-      command -v fdfind >/dev/null 2>&1 && ln -sf "$(which fdfind)" "$HOME/.local/bin/fd" && run_sudo ln -sf "$(which fdfind)" "/usr/local/bin/fd" 2>/dev/null || true
+      if command -v batcat >/dev/null 2>&1; then
+        ln -sf "$(which batcat)" "$HOME/.local/bin/bat" || true
+        run_sudo ln -sf "$(which batcat)" "/usr/local/bin/bat" 2>/dev/null || true
+      fi
+      if command -v fdfind >/dev/null 2>&1; then
+        ln -sf "$(which fdfind)" "$HOME/.local/bin/fd" || true
+        run_sudo ln -sf "$(which fdfind)" "/usr/local/bin/fd" 2>/dev/null || true
+      fi
       ;;
     arch|cachyos|manjaro|endeavouros)
       echo -e "[INFO] Installing packages via pacman..."
@@ -84,7 +90,9 @@ install_packages() {
     fedora|rhel|centos|rocky|almalinux)
       echo -e "[INFO] Installing packages via dnf..."
       run_sudo dnf install -y --allowerasing zsh fzf bat eza fd-find curl git neovim jq atuin unzip tar || true
-      command -v fdfind >/dev/null 2>&1 && run_sudo ln -sf "$(which fdfind)" "/usr/local/bin/fd" 2>/dev/null || true
+      if command -v fdfind >/dev/null 2>&1; then
+        run_sudo ln -sf "$(which fdfind)" "/usr/local/bin/fd" 2>/dev/null || true
+      fi
       ;;
     opensuse*|suse)
       echo -e "[INFO] Installing packages via zypper..."
@@ -92,20 +100,27 @@ install_packages() {
       ;;
     alpine)
       echo -e "[INFO] Installing packages via apk..."
-      run_sudo apk update && run_sudo apk add zsh fzf bat eza fd curl git neovim jq unzip tar shadow || true
+      run_sudo apk update || true
+      run_sudo apk add zsh fzf bat eza fd curl git neovim jq unzip tar shadow || true
       ;;
     gentoo)
       echo -e "[INFO] Checking packages for Gentoo..."
-      command -v zsh >/dev/null 2>&1 || run_sudo emerge --quiet app-shells/zsh || true
-      command -v git >/dev/null 2>&1 || run_sudo emerge --quiet dev-vcs/git || true
-      command -v curl >/dev/null 2>&1 || run_sudo emerge --quiet net-misc/curl || true
+      if ! command -v zsh >/dev/null 2>&1; then
+        run_sudo emerge --quiet app-shells/zsh || true
+      fi
+      if ! command -v git >/dev/null 2>&1; then
+        run_sudo emerge --quiet dev-vcs/git || true
+      fi
+      if ! command -v curl >/dev/null 2>&1; then
+        run_sudo emerge --quiet net-misc/curl || true
+      fi
       ;;
     macos)
       echo -e "[INFO] Installing packages via brew..."
       brew install zsh fzf bat eza fd curl git neovim jq atuin || true
       ;;
     *)
-      echo -e "[WARN] Generic Linux environment detected. Continuing with available binaries..."
+      echo -e "${RED}[WARN] Generic Linux environment detected. Continuing with available binaries...${NC}"
       ;;
   esac
 }
@@ -122,7 +137,7 @@ fi
 # Install eza for Ubuntu/Debian if missing
 if ! command -v eza >/dev/null 2>&1 && [[ "$OS" =~ ^(ubuntu|debian|pop|linuxmint)$ ]]; then
   echo -e "[INFO] Installing eza..."
-  run_sudo mkdir -p /etc/apt/keyrings
+  run_sudo mkdir -p /etc/apt/keyrings || true
   wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | run_sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg 2>/dev/null || true
   echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | run_sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null 2>&1 || true
   run_sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list 2>/dev/null || true

@@ -20,7 +20,7 @@ jobs:
           - 'almalinux:9'
           - 'alpine:3.21'
           - 'alpine:3.20'
-          - 'gentoo/stage3:nomultilib-openrc'
+          - 'gentoo/stage3:latest'
     steps:
       - name: Install bootstrap dependencies
         run: |
