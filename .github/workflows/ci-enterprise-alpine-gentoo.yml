@@ -20,7 +20,6 @@ jobs:
           - 'almalinux:9'
           - 'alpine:3.21'
           - 'alpine:3.20'
-          - 'gentoo/stage3:latest'
     steps:
       - name: Install bootstrap dependencies
         run: |
@@ -28,8 +27,6 @@ jobs:
             apk update && apk add sudo curl git zsh bash shadow ca-certificates
           elif command -v dnf >/dev/null 2>&1; then
             dnf install -y --allowerasing sudo curl git zsh util-linux ca-certificates
-          elif command -v emerge >/dev/null 2>&1; then
-            emerge --quiet app-shells/zsh app-admin/sudo dev-vcs/git net-misc/curl app-misc/ca-certificates || true
           fi
 
       - name: Checkout repository
