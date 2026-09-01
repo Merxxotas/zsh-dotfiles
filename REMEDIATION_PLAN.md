@@ -1,7 +1,8 @@
 # Plan integral de remediacion
 
-> - Estado: propuesto
+> - Estado: completado (auditado y verificado en main)
 > - Linea base auditada: `b2fc77c`
+> - Entrega final: `1a3dc6e` (Pull Request #1)
 > - Alcance: instalador, configuracion Zsh, plugins, utilidades multimedia, seguridad, pruebas, CI y documentacion
 > - Objetivo: eliminar los fallos funcionales y de seguridad conocidos, y convertir las afirmaciones de compatibilidad en evidencia reproducible
 
@@ -24,13 +25,13 @@ Este plan busca llevar el proyecto desde una configuracion personal funcional, p
 
 La remediacion se considera completa cuando:
 
-- [ ] Todos los elementos `P0` y `P1` de este documento estan cerrados.
-- [ ] Las pruebas unitarias y de integracion pasan sin red, salvo jobs explicitamente marcados como pruebas externas.
-- [ ] Las matrices soportadas pasan como usuario normal y, cuando corresponda, como root.
-- [ ] No se ejecutan `curl | sh`, `curl | bash`, referencias `latest` ni ramas flotantes para codigo ejecutable.
-- [ ] La instalacion no escribe en el repositorio ni sigue symlinks externos de manera implicita.
-- [ ] Todos los mensajes `[OK]` corresponden a una operacion verificada con codigo `0`.
-- [ ] README, escenarios, workflows y comportamiento real coinciden.
+- [x] Todos los elementos `P0` y `P1` de este documento estan cerrados.
+- [x] Las pruebas unitarias y de integracion pasan sin red, salvo jobs explicitamente marcados como pruebas externas.
+- [x] Las matrices soportadas pasan como usuario normal y, cuando corresponda, como root.
+- [x] No se ejecutan `curl | sh`, `curl | bash`, referencias `latest` ni ramas flotantes para codigo ejecutable.
+- [x] La instalacion no escribe en el repositorio ni sigue symlinks externos de manera implicita.
+- [x] Todos los mensajes `[OK]` corresponden a una operacion verificada con codigo `0`.
+- [x] README, escenarios, workflows y comportamiento real coinciden.
 
 ## 2. Prioridades
 
