@@ -2,8 +2,16 @@
 # ~/.config/zsh/aliases.zsh - Aliases & Abbreviations
 # =========================================================
 
+# --- Didactic Reminder Engine (zsh-you-should-use) Configuration ---
+# Ignore expanded abbreviations to prevent duplicate warning popups
+export YSU_IGNORED_ALIASES=(
+  gs gss ga gaa gc gca gp gpl gco gb gd lg pac pacs pacu yay sc scu
+)
+export YSU_MESSAGE_POSITION="after"
+
 # --- Git & System Aliases (Compatible with you-should-use) ---
 alias gs='git status -s'
+
 alias gss='git status'
 alias ga='git add'
 alias gaa='git add --all'
