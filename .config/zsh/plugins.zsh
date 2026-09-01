@@ -15,17 +15,30 @@ _ZSH_MISSING_PLUGINS=()
 _zplugin_load() {
   local name="${1}"
   local entrypoint="${2:-${name}.plugin.zsh}"
-  local plugin_path="${ZPLUGINDIR}/${name}"
+  local plugin_path=""
 
-  if [[ -f "${plugin_path}/${entrypoint}" ]]; then
-    source "${plugin_path}/${entrypoint}"
-  elif [[ -f "${plugin_path}/${name}.plugin.zsh" ]]; then
-    source "${plugin_path}/${name}.plugin.zsh"
-  elif [[ -f "${plugin_path}/${name}.zsh" ]]; then
-    source "${plugin_path}/${name}.zsh"
-  else
-    _ZSH_MISSING_PLUGINS+=("$name")
+  if [[ -d "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/${name}" ]]; then
+    plugin_path="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/${name}"
+  elif [[ -d "${ZDOTDIR:-$HOME/.config/zsh}/plugins/${name}" ]]; then
+    plugin_path="${ZDOTDIR:-$HOME/.config/zsh}/plugins/${name}"
+  elif [[ -d "$ZPLUGINDIR/${name}" ]]; then
+    plugin_path="$ZPLUGINDIR/${name}"
   fi
+
+  if [[ -n "$plugin_path" ]]; then
+    if [[ -f "${plugin_path}/${entrypoint}" ]]; then
+      source "${plugin_path}/${entrypoint}"
+      return 0
+    elif [[ -f "${plugin_path}/${name}.plugin.zsh" ]]; then
+      source "${plugin_path}/${name}.plugin.zsh"
+      return 0
+    elif [[ -f "${plugin_path}/${name}.zsh" ]]; then
+      source "${plugin_path}/${name}.zsh"
+      return 0
+    fi
+  fi
+
+  _ZSH_MISSING_PLUGINS+=("$name")
 }
 
 # Explicit Plugin Installer from Lockfile (Zero network during normal startup)

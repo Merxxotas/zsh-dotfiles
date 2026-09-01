@@ -28,10 +28,10 @@ _init_posh_theme() {
   local theme="$(_get_current_posh_theme)"
   local config=""
 
-  if [[ -f "$CACHE_THEME_DIR/${theme}.omp.json" ]]; then
-    config="$CACHE_THEME_DIR/${theme}.omp.json"
-  elif [[ -f "$THEME_DIR/${theme}.omp.json" ]]; then
+  if [[ -f "$THEME_DIR/${theme}.omp.json" ]]; then
     config="$THEME_DIR/${theme}.omp.json"
+  elif [[ -f "$CACHE_THEME_DIR/${theme}.omp.json" ]]; then
+    config="$CACHE_THEME_DIR/${theme}.omp.json"
   elif [[ -f "$THEME_DIR/clean-detailed.omp.json" ]]; then
     config="$THEME_DIR/clean-detailed.omp.json"
   fi
@@ -144,5 +144,6 @@ except Exception as e:
   echo "$theme" > "${ZDOTDIR:-$HOME/.config/zsh}/current_theme" 2>/dev/null || true
 
   echo "[OK] Theme '$theme' applied and set as default."
+  rm -f "${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-posh/init."*.zsh 2>/dev/null || true
   eval "$(oh-my-posh init zsh --config "$target_file")"
 }
