@@ -48,32 +48,58 @@ compdef eza=ls 2>/dev/null
 
 unalias ls 2>/dev/null
 ls() {
-  case "$*" in
-    *-la*|*-al*|*-lha*|*-lah*|*-alh*|*-ahl*|*-hla*|*-hal*)
-      command eza -aghHliS --icons --git --group-directories-first "$@" ;;
-    *)
-      command eza -lH --icons --group-directories-first --git "$@" ;;
-  esac
+  if command -v eza >/dev/null 2>&1; then
+    case "$*" in
+      *-la*|*-al*|*-lha*|*-lah*|*-alh*|*-ahl*|*-hla*|*-hal*)
+        command eza -aghHliS --icons --git --group-directories-first "$@" ;;
+      *)
+        command eza -lH --icons --group-directories-first --git "$@" ;;
+    esac
+  else
+    command ls --color=auto "$@"
+  fi
 }
 
 # --- Directory Listings ---
-alias ll='eza -aghHliS --icons --git --group-directories-first'
-alias la='eza -lah --icons --git'
-alias lt='eza --tree --icons --git'
-alias lt1='eza --tree --icons --git --level=1'
-alias lt2='eza --tree --icons --git --level=2'
-alias lt3='eza --tree --icons --git --level=3'
-alias lt4='eza --tree --icons --git --level=4'
-alias lt5='eza --tree --icons --git --level=5'
+if command -v eza >/dev/null 2>&1; then
+  alias ll='eza -aghHliS --icons --git --group-directories-first'
+  alias la='eza -lah --icons --git'
+  alias lt='eza --tree --icons --git'
+  alias lt1='eza --tree --icons --git --level=1'
+  alias lt2='eza --tree --icons --git --level=2'
+  alias lt3='eza --tree --icons --git --level=3'
+  alias lt4='eza --tree --icons --git --level=4'
+  alias lt5='eza --tree --icons --git --level=5'
+else
+  alias ll='ls -lh'
+  alias la='ls -lah'
+fi
 
 # --- Core Utilities ---
-alias cat='bat'
+if command -v bat >/dev/null 2>&1; then
+  alias cat='bat'
+elif command -v batcat >/dev/null 2>&1; then
+  alias cat='batcat'
+fi
+
 alias grep='grep --color=auto'
 alias diff='diff --color=auto'
 alias df='df -h'
 alias vim='nvim'
-alias cp='/usr/local/bin/cpg -g'
-alias mv='/usr/local/bin/mvg -g'
+
+# Advanced copy / move with progress if installed
+if command -v cpg >/dev/null 2>&1; then
+  alias cp='cpg -g'
+elif [ -x /usr/local/bin/cpg ]; then
+  alias cp='/usr/local/bin/cpg -g'
+fi
+
+if command -v mvg >/dev/null 2>&1; then
+  alias mv='mvg -g'
+elif [ -x /usr/local/bin/mvg ]; then
+  alias mv='/usr/local/bin/mvg -g'
+fi
+
 alias -- -='cd -'
 
 # --- Navigation and Network Utilities ---
@@ -96,28 +122,10 @@ y() {
   rm -f -- "$tmp"
 }
 
-# --- GitHub CLI: Context-Aware Account Selector by Path ---
-gh() {
-  case "$PWD/" in
-    "$HOME/Documents/Projekt-Agency/"*)
-      GH_CONFIG_DIR="$HOME/.config/gh-work" command gh "$@" ;;
-    *)
-      command gh "$@" ;;
-  esac
-}
-
-# --- Vocabulary Engine on Session Start ---
-if [[ -f "$HOME/.vocab" ]]; then
-  chmod +x "$HOME/.vocab" 2>/dev/null
-  "$HOME/.vocab" || true
-fi
-
 # --- Safe Clear Wrapper with Guaranteed Exit Code 0 ---
 clean_clear() {
   command clear
-  if [[ -f "$HOME/.vocab" ]]; then
-    "$HOME/.vocab"
-  fi
   return 0
 }
 alias clear=clean_clear
+
