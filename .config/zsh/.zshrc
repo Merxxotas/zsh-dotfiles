@@ -25,12 +25,18 @@ setopt PUSHD_MINUS
 # --- Disable Bracketed Paste Highlight Artifacts ---
 zle_highlight=(paste:none)
 
-# --- Completion Engine Initialization ---
+# --- Completion Engine Initialization (Optimized <30ms Cache) ---
+setopt EXTENDED_GLOB
 autoload -Uz compinit
-compinit -u -d "$XDG_CACHE_HOME/zsh/zcompdump"
+if [[ -n ${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump(#qN.mh+24) ]]; then
+  compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+else
+  compinit -C -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+fi
 
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
 
 # --- Universal FZF Sourcing (Arch, Ubuntu, Debian, Fedora, macOS) ---
 if command -v fzf >/dev/null 2>&1; then

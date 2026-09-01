@@ -18,12 +18,21 @@ elif [ -f "/opt/homebrew/bin/brew" ]; then
   eval "$(/opt/homebrew/bin/brew shellenv zsh)"
 fi
 
-# NVM (Node Version Manager)
-if [ -f "/usr/share/nvm/init-nvm.sh" ]; then
-  source /usr/share/nvm/init-nvm.sh
-elif [ -d "$HOME/.nvm" ]; then
+# NVM (Node Version Manager) - Zero-Latency Lazy Loader
+if [ -d "$HOME/.nvm" ] || [ -f "/usr/share/nvm/init-nvm.sh" ]; then
   export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  _load_nvm() {
+    unset -f nvm node npm npx yarn pnpm bun 2>/dev/null
+    if [ -f "/usr/share/nvm/init-nvm.sh" ]; then
+      source /usr/share/nvm/init-nvm.sh
+    elif [ -s "$NVM_DIR/nvm.sh" ]; then
+      \. "$NVM_DIR/nvm.sh"
+    fi
+  }
+  nvm()  { _load_nvm; nvm "$@"; }
+  node() { _load_nvm; node "$@"; }
+  npm()  { _load_nvm; npm "$@"; }
+  npx()  { _load_nvm; npx "$@"; }
 fi
 
 # Zoxide (Smart cd Replacement)
@@ -39,13 +48,21 @@ fi
 # Railway CLI
 [ -f "$HOME/.railway/env" ] && source "$HOME/.railway/env"
 
-# Google Cloud SDK
-if [ -f "$HOME/Downloads/google-cloud-sdk/path.zsh.inc" ]; then
-  . "$HOME/Downloads/google-cloud-sdk/path.zsh.inc"
-fi
-if [ -f "$HOME/Downloads/google-cloud-sdk/completion.zsh.inc" ]; then
-  . "$HOME/Downloads/google-cloud-sdk/completion.zsh.inc"
-fi
+# Google Cloud SDK (Common System & User Paths)
+for gcloud_dir in \
+  "$HOME/google-cloud-sdk" \
+  "/usr/lib/google-cloud-sdk" \
+  "/opt/google-cloud-sdk" \
+  "/usr/local/google-cloud-sdk" \
+  "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk" \
+  "$HOME/Downloads/google-cloud-sdk"; do
+  if [ -d "$gcloud_dir" ]; then
+    [ -f "$gcloud_dir/path.zsh.inc" ] && . "$gcloud_dir/path.zsh.inc"
+    [ -f "$gcloud_dir/completion.zsh.inc" ] && . "$gcloud_dir/completion.zsh.inc"
+    break
+  fi
+done
+
 
 # IntelliShell
 export INTELLI_HOME="$HOME/.local/share/intelli-shell"
