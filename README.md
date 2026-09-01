@@ -48,12 +48,13 @@ A high-performance, modular, and minimalist ZSH configuration suite. Designed fo
 ~/.config/zsh/
 ├── .zshenv                # Environment variables, consolidated PATH, XDG base paths, TERM fallback
 ├── .zshrc                 # Core shell options, history, compinit, module loader
-├── aliases.zsh            # Abbreviations (zsh-abbr), git aliases, eza, yazi wrapper, gh switcher
+├── aliases.zsh            # Resilient aliases, abbreviations (zsh-abbr), git, safe ls & clear
 ├── bindings.zsh           # Vi-mode configuration, Magic Sudo (Alt+S), Atuin hooks
-├── dev-env.zsh            # Integrations: Atuin, NVM, Bun, PNPM, Cargo, Homebrew, Google Cloud SDK
+├── dev-env.zsh            # Integrations: Atuin, NVM (lazy load), Bun, PNPM, Cargo, Homebrew, GCloud
 ├── fzf.zsh                # Fuzzy finder defaults and bat preview integration
 ├── fzf-tab.zsh            # Context-sensitive Tab completion rules and preview hooks
 ├── helpers.zsh            # Universal take() and multi-file extract() utilities
+├── local.zsh.example      # Template for private host-specific variables and API keys
 ├── media.zsh              # Universal media suite: vconv, vdl, adl, vaudio, vcut, vgif
 ├── plugins.zsh            # Autonomous zero-overhead Git plugin loader and updater
 ├── prompt.zsh             # Oh-My-Posh engine and posh-theme CLI manager (150+ themes)
@@ -158,17 +159,54 @@ cd ~/Projects/zsh-dotfiles
 
 ### 2. Execute the Automated Installer
 
+Standard copy deployment (with automated backup of previous configurations):
+
 ```bash
 ./install.sh
 ```
 
-For automated deployments or CI environments, run with the unattended flag:
+Symlink deployment (recommended for dotfiles development so changes link directly to repo):
+
+```bash
+./install.sh -s
+```
+
+Unattended mode for CI and automated server provisioning:
 
 ```bash
 ./install.sh -y
 ```
 
 ---
+
+## Private Configuration & API Keys (`local.zsh`)
+
+To configure machine-specific environment variables, private aliases, or third-party API keys without committing them to Git:
+
+```bash
+cp ~/.config/zsh/local.zsh.example ~/.config/zsh/local.zsh
+```
+
+### Supported API Keys
+
+1. **Giphy API Key (`GIPHY_API_KEY`)**:
+   - Used by CLI media tools and GIF engines.
+   - Obtain a free API key at [Giphy Developers Portal](https://developers.giphy.com/).
+2. **Klipy API Key (`KLIPY_API_KEY`)**:
+   - Used for sticker and clip search integrations.
+   - Obtain a key at [Klipy Developer Portal](https://klipy.co/).
+
+Add them inside `~/.config/zsh/local.zsh`:
+
+```zsh
+export GIPHY_API_KEY="your_actual_key_here"
+export KLIPY_API_KEY="your_actual_key_here"
+```
+
+`~/.config/zsh/local.zsh` is automatically loaded by `.zshrc` and ignored by Git.
+
+---
+
 
 ## Theme Management (`posh-theme`)
 
