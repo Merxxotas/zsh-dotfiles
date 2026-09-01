@@ -1,7 +1,97 @@
 # =========================================================
 # ~/.config/zsh/media.zsh - Universal Media Utilities
-# Engines: ffmpeg & yt-dlp
+# Engines: ffmpeg & yt-dlp + Smart Multi-Platform Resolvers
 # =========================================================
+
+# --- Helper interno: Resolver de contingencia para Twitter, TikTok y Kick ---
+_vdl_fallback_resolve() {
+  local target_url="$1"
+  python3 -c "
+import urllib.request, json, re, sys
+
+url = sys.argv[1].strip()
+
+# 1. Resolver Twitter/X (Videos largos, NSFW o restringidos)
+if 'x.com' in url or 'twitter.com' in url:
+    m = re.search(r'status/(\d+)', url)
+    if m:
+        tweet_id = m.group(1)
+        for api_url in [f'https://api.fxtwitter.com/status/{tweet_id}', f'https://api.vxtwitter.com/status/{tweet_id}']:
+            try:
+                req = urllib.request.Request(api_url, headers={'User-Agent': 'Mozilla/5.0'})
+                res = urllib.request.urlopen(req, timeout=10)
+                data = json.loads(res.read().decode())
+                media = data.get('tweet', {}).get('media', {}).get('videos', [])
+                if media:
+                    formats = media[0].get('formats', [])
+                    mp4_formats = [f for f in formats if f.get('container') == 'mp4']
+                    mp4_formats.sort(key=lambda x: x.get('bitrate', 0), reverse=True)
+                    best = mp4_formats[0]['url'] if mp4_formats else media[0]['url']
+                    title = data.get('tweet', {}).get('text', 'twitter_video')[:40]
+                    title = re.sub(r'[^\w\s-]', '', title).strip().replace(' ', '_')
+                    print(f'RESOLVED|{best}|{title or \"twitter_video\"}')
+                    sys.exit(0)
+            except Exception:
+                pass
+
+# 2. Resolver TikTok (Bypass Anti-Bot y sin marca de agua)
+if 'tiktok.com' in url:
+    try:
+        req = urllib.request.Request(f'https://www.tikwm.com/api/?url={url}', headers={'User-Agent': 'Mozilla/5.0'})
+        res = urllib.request.urlopen(req, timeout=10)
+        data = json.loads(res.read().decode())
+        if data.get('code') == 0:
+            play_url = data['data']['play']
+            title = data['data'].get('title', 'tiktok_video')[:40]
+            title = re.sub(r'[^\w\s-]', '', title).strip().replace(' ', '_')
+            print(f'RESOLVED|{play_url}|{title or \"tiktok_video\"}')
+            sys.exit(0)
+    except Exception:
+        pass
+
+# 3. Resolver Kick.com (VODs y Clips HLS)
+if 'kick.com' in url:
+    # Caso 1: kick.com/<channel>/videos/<uuid>
+    m_vod = re.search(r'kick\.com/([^/?#]+)/videos/([a-zA-Z0-9-]+)', url)
+    if m_vod:
+        channel, uuid = m_vod.group(1), m_vod.group(2)
+        try:
+            req = urllib.request.Request(f'https://kick.com/api/v2/channels/{channel}/videos', headers={'User-Agent': 'Mozilla/5.0'})
+            res = urllib.request.urlopen(req, timeout=10)
+            data = json.loads(res.read().decode())
+            videos = data if isinstance(data, list) else data.get('videos', [])
+            for v in videos:
+                if v.get('video', {}).get('uuid') == uuid or str(v.get('id')) == uuid:
+                    source = v.get('source')
+                    title = v.get('session_title', 'kick_vod')[:40]
+                    title = re.sub(r'[^\w\s-]', '', title).strip().replace(' ', '_')
+                    print(f'RESOLVED|{source}|{title or \"kick_vod\"}')
+                    sys.exit(0)
+            print('KICK_EXPIRED')
+            sys.exit(0)
+        except Exception:
+            pass
+
+    # Caso 2: kick.com/video/<uuid>
+    m_single = re.search(r'kick\.com/video/([a-zA-Z0-9-]+)', url)
+    if m_single:
+        uuid = m_single.group(1)
+        try:
+            req = urllib.request.Request(f'https://kick.com/api/v1/video/{uuid}', headers={'User-Agent': 'Mozilla/5.0'})
+            res = urllib.request.urlopen(req, timeout=10)
+            data = json.loads(res.read().decode())
+            source = data.get('source')
+            if source:
+                title = data.get('session_title', 'kick_vod')[:40]
+                title = re.sub(r'[^\w\s-]', '', title).strip().replace(' ', '_')
+                print(f'RESOLVED|{source}|{title or \"kick_vod\"}')
+                sys.exit(0)
+        except Exception:
+            pass
+
+print('NOT_RESOLVED')
+" "$target_url" 2>/dev/null || echo "NOT_RESOLVED"
+}
 
 # 1. vconv: Convertidor universal de formatos de video (Soporta archivos individuales y lotes)
 # Uso: vconv [-f] <archivo(s)> <formato_destino>
@@ -90,7 +180,7 @@ vconv() {
   echo "[INFO] Conversion complete: $success succeeded, $failed failed."
 }
 
-# 2. vdl: Descargador universal de video (YouTube, Twitter/X, TikTok, Instagram, Reddit, Twitch, Vimeo, etc.)
+# 2. vdl: Descargador universal de video (YouTube, Twitter/X, TikTok, Instagram, Reddit, Twitch, Kick, Vimeo, etc.)
 # Formatos soportados: mp4, mkv, webm, mov, avi
 # Códecs soportados: av1, h264, vp9, hevc
 # Uso: vdl "<url>" [-f <format>] [-q <resolution>] [-c <codec>] [-p] [-o <output_name>]
@@ -111,19 +201,26 @@ vdl() {
     echo "Examples:"
     echo "  vdl \"https://www.youtube.com/watch?v=...\""
     echo "  vdl \"https://www.youtube.com/watch?v=...\" -f mkv"
-    echo "  vdl \"https://www.youtube.com/watch?v=...\" -f webm -c av1"
     echo "  vdl \"https://x.com/user/status/...\" -f mp4"
+    echo "  vdl \"https://www.tiktok.com/@user/video/...\""
+    echo "  vdl \"https://kick.com/channel/videos/...\""
     return 1
   fi
 
-  local url="$1"
+  local raw_url="$1"
   shift
+
+  # Normalización previa de la URL
+  local clean_url="$raw_url"
+  if [[ "$raw_url" =~ (x\.com|twitter\.com) ]]; then
+    clean_url=$(echo "$raw_url" | sed -E 's#/video/[0-9]+##g; s#\?.*##g')
+  fi
 
   local target_format="mp4"
   local max_res=""
   local preferred_codec=""
   local playlist_flag="--no-playlist"
-  local custom_output="%(title)s.%(ext)s"
+  local user_custom_output=""
 
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -145,7 +242,7 @@ vdl() {
         shift
         ;;
       -o|--output)
-        custom_output="$2.%(ext)s"
+        user_custom_output="$2"
         shift 2
         ;;
       *)
@@ -153,6 +250,11 @@ vdl() {
         ;;
     esac
   done
+
+  local custom_output="%(title)s.%(ext)s"
+  if [ -n "$user_custom_output" ]; then
+    custom_output="${user_custom_output}.%(ext)s"
+  fi
 
   # Construir selector de formato inteligente
   local vcodec_filter=""
@@ -192,8 +294,8 @@ vdl() {
     thumbnail_flag=""
   fi
 
-  echo "[INFO] Downloading video in '$target_format' format from '$url'..."
-  yt-dlp \
+  echo "[INFO] Downloading video in '$target_format' format from '$clean_url'..."
+  if yt-dlp \
     -f "$format_selector" \
     --merge-output-format "$target_format" \
     --concurrent-fragments 5 \
@@ -202,14 +304,43 @@ vdl() {
     --windows-filenames \
     $playlist_flag \
     -o "$custom_output" \
-    "$url"
-
-  if [ $? -eq 0 ]; then
-    echo "[OK] Download completed successfully in '$target_format' format."
-  else
-    echo "[ERROR] Download failed."
-    return 1
+    "$clean_url" 2>/dev/null; then
+      echo "[OK] Download completed successfully in '$target_format' format."
+      return 0
   fi
+
+  # --- Contingencia Automática (Smart Fallback) ---
+  echo "[INFO] Direct scraping failed. Activating multi-platform smart fallback..."
+  local fallback_result="$(_vdl_fallback_resolve "$raw_url")"
+
+  if [[ "$fallback_result" == "KICK_EXPIRED" ]]; then
+    echo "[ERROR] This Kick VOD is no longer available on Kick's servers (expired or deleted by streamer)."
+    return 1
+  elif [[ "$fallback_result" =~ ^RESOLVED\| ]]; then
+    local stream_url=$(echo "$fallback_result" | cut -d'|' -f2)
+    local stream_title=$(echo "$fallback_result" | cut -d'|' -f3)
+    
+    local out_filename="${user_custom_output:-$stream_title}.${target_format}"
+    echo "[INFO] Stream resolved. Downloading high quality stream to '$out_filename'..."
+
+    if yt-dlp \
+      --merge-output-format "$target_format" \
+      --concurrent-fragments 5 \
+      -o "$out_filename" \
+      "$stream_url"; then
+        echo "[OK] Download completed successfully via smart fallback: '$out_filename'"
+        return 0
+    elif command -v ffmpeg >/dev/null 2>&1; then
+        ffmpeg -hide_banner -loglevel warning -stats -i "$stream_url" -c copy "$out_filename"
+        if [ $? -eq 0 ]; then
+          echo "[OK] Download completed successfully via ffmpeg stream copy: '$out_filename'"
+          return 0
+        fi
+    fi
+  fi
+
+  echo "[ERROR] All download attempts and fallbacks failed for '$raw_url'."
+  return 1
 }
 
 # 3. adl: Descargador universal de audio (MP3 en alta calidad 320kbps con carátula)
