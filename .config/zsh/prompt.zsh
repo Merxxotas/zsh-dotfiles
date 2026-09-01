@@ -48,15 +48,11 @@ posh-theme() {
 
   if [[ -z "$theme" ]]; then
     if command -v fzf >/dev/null 2>&1; then
-      local all_themes=()
-      if [[ -d "$cache_dir" ]]; then
-        all_themes+=($(ls -1 "$cache_dir" 2>/dev/null | grep '\.omp\.json$' | sed 's/\.omp\.json$//'))
-      fi
-      if [[ -d "$theme_dir" ]]; then
-        all_themes+=($(ls -1 "$theme_dir" 2>/dev/null | grep '\.omp\.json$' | sed 's/\.omp\.json$//'))
-      fi
+      local raw_files=()
+      [[ -d "$cache_dir" ]] && raw_files+=("$cache_dir"/*.omp.json(N:t))
+      [[ -d "$theme_dir" ]] && raw_files+=("$theme_dir"/*.omp.json(N:t))
 
-      local unique_themes=($(printf '%s\n' "${all_themes[@]}" | sort -u))
+      local unique_themes=(${(u)${(@)raw_files%.omp.json}})
 
       theme=$(printf '%s\n' "${unique_themes[@]}" | fzf \
         --height=50% \
