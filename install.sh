@@ -364,6 +364,10 @@ install_locked_dependency() {
   fi
 
   chmod 755 "$TARGET_HOME/.local/bin/$name"
+  if [ "$(id -u)" -eq 0 ] || [ -w "/usr/local/bin" ]; then
+    mkdir -p "/usr/local/bin" 2>/dev/null || true
+    ln -sf "$TARGET_HOME/.local/bin/$name" "/usr/local/bin/$name" 2>/dev/null || true
+  fi
   rm -rf "$tmp_dir"
   echo -e "  ${GREEN}[OK]${NC} Installed $name into $TARGET_HOME/.local/bin/$name"
   return 0
