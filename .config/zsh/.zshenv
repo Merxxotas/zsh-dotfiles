@@ -2,7 +2,7 @@
 # ~/.config/zsh/.zshenv - Universal Environment & PATH
 # =========================================================
 
-# Fallback universal para TERM (resuelve duplicación de caracteres en Ghostty / Kitty sobre SSH)
+# Universal TERM fallback (prevents character duplication over SSH from Ghostty / Kitty)
 if ! infocmp "$TERM" >/dev/null 2>&1; then
   export TERM="xterm-256color"
 fi
@@ -13,21 +13,21 @@ export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 
-# Editor predeterminado
+# Default Editor
 export EDITOR="nvim"
 export VISUAL="nvim"
 
-# Pager con bat / batcat (compatibilidad Ubuntu/Debian)
+# Manpager with bat / batcat (Debian/Ubuntu compatibility)
 if command -v bat >/dev/null 2>&1; then
   export MANPAGER="bat -l man -p"
 elif command -v batcat >/dev/null 2>&1; then
   export MANPAGER="batcat -l man -p"
 fi
 
-# GPG
+# GPG TTY
 export GPG_TTY=$(tty)
 
-# PATH Consolidado y Universal
+# Consolidated Universal PATH
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.atuin/bin:$PATH"
 
 # Bun & PNPM
@@ -40,10 +40,10 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
 
-# Cargo env
+# Cargo environment
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
-# Variables del sistema y aplicaciones
+# System and Application Variables
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 
 

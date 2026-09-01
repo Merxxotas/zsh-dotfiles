@@ -1,5 +1,5 @@
 # =========================================================
-# ~/.config/zsh/plugins.zsh - Minimalist Plugin Engine
+# ~/.config/zsh/plugins.zsh - Minimalist Zero-Overhead Plugin Engine
 # =========================================================
 
 ZPLUGINDIR="${ZDOTDIR:-$HOME/.config/zsh}/plugins"
@@ -34,7 +34,7 @@ zplugin-update() {
   done
 }
 
-# Core Plugins
+# --- Core Plugins ---
 _zplugin_load zsh-users zsh-autosuggestions
 _zplugin_load zsh-users zsh-history-substring-search
 _zplugin_load jeffreytse zsh-vi-mode

@@ -2,7 +2,7 @@
 # ~/.config/zsh/aliases.zsh - Aliases & Abbreviations
 # =========================================================
 
-# --- Git & System Aliases (Compatibles con you-should-use) ---
+# --- Git & System Aliases (Compatible with you-should-use) ---
 alias gs='git status -s'
 alias gss='git status'
 alias ga='git add'
@@ -22,7 +22,7 @@ alias yay='paru -S'
 alias sc='sudo systemctl'
 alias scu='systemctl --user'
 
-# --- Abreviaciones en Tiempo Real (zsh-abbr) ---
+# --- Real-Time Expansion Abbreviations (zsh-abbr) ---
 if command -v abbr >/dev/null 2>&1; then
   abbr -S gs="git status -s" >/dev/null 2>&1
   abbr -S gss="git status" >/dev/null 2>&1
@@ -56,7 +56,7 @@ ls() {
   esac
 }
 
-# Listados
+# --- Directory Listings ---
 alias ll='eza -aghHliS --icons --git --group-directories-first'
 alias la='eza -lah --icons --git'
 alias lt='eza --tree --icons --git'
@@ -66,7 +66,7 @@ alias lt3='eza --tree --icons --git --level=3'
 alias lt4='eza --tree --icons --git --level=4'
 alias lt5='eza --tree --icons --git --level=5'
 
-# Core utilities
+# --- Core Utilities ---
 alias cat='bat'
 alias grep='grep --color=auto'
 alias diff='diff --color=auto'
@@ -76,17 +76,17 @@ alias cp='/usr/local/bin/cpg -g'
 alias mv='/usr/local/bin/mvg -g'
 alias -- -='cd -'
 
-# Navegación y utilidades
+# --- Navigation and Network Utilities ---
 alias weather='curl wttr.in'
 alias weather1='weathr'
 alias speedtest='cloudflare-speed-cli'
 alias spotify_player='KITTY_WINDOW_ID=1 TERM=xterm-kitty spotify_player'
 
-# Git log formateado
+# --- Formatted Git Log ---
 alias glog='PAGER="less -F -X" git log'
 alias gadog='PAGER="less -F -X" git log --all --decorate --oneline --graph'
 
-# Wrapper para Yazi: al salir, hace cd al directorio donde navegaste
+# --- Yazi File Manager Wrapper (cd to navigated directory on exit) ---
 y() {
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
   yazi "$@" --cwd-file="$tmp"
@@ -96,7 +96,7 @@ y() {
   rm -f -- "$tmp"
 }
 
-# GitHub CLI: selector contextual de cuenta por carpeta
+# --- GitHub CLI: Context-Aware Account Selector by Path ---
 gh() {
   case "$PWD/" in
     "$HOME/Documents/Projekt-Agency/"*)
@@ -106,13 +106,13 @@ gh() {
   esac
 }
 
-# Vocab al iniciar (seguro, sin retornar código 1 si no existe)
+# --- Vocabulary Engine on Session Start ---
 if [[ -f "$HOME/.vocab" ]]; then
   chmod +x "$HOME/.vocab" 2>/dev/null
   "$HOME/.vocab" || true
 fi
 
-# Función clear segura que garantiza código de salida 0
+# --- Safe Clear Wrapper with Guaranteed Exit Code 0 ---
 clean_clear() {
   command clear
   if [[ -f "$HOME/.vocab" ]]; then

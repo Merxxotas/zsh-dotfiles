@@ -2,7 +2,7 @@
 # ~/.config/zsh/.zshrc - Universal Super Profile
 # =========================================================
 
-# --- Historial XDG ---
+# --- XDG History Configuration ---
 HISTFILE="$XDG_STATE_HOME/zsh/history"
 HISTSIZE=100000
 SAVEHIST=100000
@@ -14,7 +14,7 @@ setopt HIST_IGNORE_SPACE
 setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_FIND_NO_DUPS
 
-# --- Opciones Avanzadas ---
+# --- Advanced Shell Options ---
 setopt AUTOCD
 setopt NOBEEP
 setopt NUMERIC_GLOB_SORT
@@ -22,17 +22,17 @@ setopt AUTO_PUSHD
 setopt PUSHD_IGNORE_DUPS
 setopt PUSHD_MINUS
 
-# --- Desactivar resaltado molesto al pegar texto ---
+# --- Disable Bracketed Paste Highlight Artifacts ---
 zle_highlight=(paste:none)
 
-# --- Sistema de Autocompletado ---
+# --- Completion Engine Initialization ---
 autoload -Uz compinit
 compinit -u -d "$XDG_CACHE_HOME/zsh/zcompdump"
 
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
-# --- Sourcing Universal de FZF (Arch, Ubuntu, Debian, Fedora, macOS) ---
+# --- Universal FZF Sourcing (Arch, Ubuntu, Debian, Fedora, macOS) ---
 if command -v fzf >/dev/null 2>&1; then
   if fzf --zsh >/dev/null 2>&1; then
     source <(fzf --zsh)
@@ -49,7 +49,7 @@ if command -v fzf >/dev/null 2>&1; then
   fi
 fi
 
-# --- Módulos del Super Perfil ---
+# --- Modular Architecture Components ---
 source "$ZDOTDIR/fzf.zsh"
 source "$ZDOTDIR/helpers.zsh"
 source "$ZDOTDIR/media.zsh"
@@ -60,7 +60,7 @@ source "$ZDOTDIR/dev-env.zsh"
 source "$ZDOTDIR/fzf-tab.zsh"
 source "$ZDOTDIR/prompt.zsh"
 
-# --- Configuración Privada Opcional ---
+# --- Optional Host-Local Overrides ---
 if [[ -f "$ZDOTDIR/local.zsh" ]]; then
   source "$ZDOTDIR/local.zsh"
 fi

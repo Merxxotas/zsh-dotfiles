@@ -1,5 +1,5 @@
 # =========================================================
-# ~/.config/zsh/prompt.zsh - Oh-My-Posh & Theme Manager
+# ~/.config/zsh/prompt.zsh - Oh-My-Posh Engine & Theme Manager
 # =========================================================
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
@@ -42,7 +42,7 @@ posh-theme() {
   local cache_dir="$HOME/.cache/oh-my-posh/themes"
   mkdir -p "$theme_dir"
 
-  # Limpiar extensión si el usuario la pasa (e.g. if_tea.omp.json -> if_tea)
+  # Sanitize extension if passed (e.g. if_tea.omp.json -> if_tea)
   theme="${theme%.omp.json}"
   theme="${theme%.json}"
 
@@ -73,12 +73,12 @@ posh-theme() {
 
   [[ -z "$theme" ]] && return 0
 
-  # 1. Si está en la caché de oh-my-posh, copiar a theme_dir
+  # 1. If present in Oh-My-Posh cache, copy to local themes directory
   if [[ ! -f "$theme_dir/${theme}.omp.json" && -f "$cache_dir/${theme}.omp.json" ]]; then
     command cp "$cache_dir/${theme}.omp.json" "$theme_dir/${theme}.omp.json"
   fi
 
-  # 2. Si aún no existe localmente, descargar desde GitHub
+  # 2. If not found locally or in cache, download from official repository
   if [[ ! -f "$theme_dir/${theme}.omp.json" ]]; then
     echo "[INFO] Downloading theme '$theme' from Oh-My-Posh official repository..."
     if curl -sLf "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/${theme}.omp.json" -o "$theme_dir/${theme}.omp.json"; then
@@ -90,7 +90,7 @@ posh-theme() {
     fi
   fi
 
-  # Limpiar transient_prompt si existe para evitar artefactos visuales
+  # Remove transient_prompt to prevent visual layout shifts
   if command -v python3 >/dev/null 2>&1; then
     python3 -c "
 import json

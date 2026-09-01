@@ -2,7 +2,7 @@
 # ~/.config/zsh/bindings.zsh - Keybindings & Vi-Mode
 # =========================================================
 
-# Forma del cursor: Barra en inserción (|), Bloque en comando (█)
+# Cursor Shape: Beam in Insert Mode (|), Solid Block in Normal/Visual Mode (█)
 ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BEAM
 ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLOCK
 ZVM_VISUAL_MODE_CURSOR=$ZVM_CURSOR_BLOCK
@@ -11,7 +11,7 @@ ZVM_VI_HIGHLIGHT_BACKGROUND=none
 ZVM_VI_HIGHLIGHT_FOREGROUND=none
 ZVM_VI_HIGHLIGHT_EXTRASTYLE=none
 
-# Función Magic Sudo: antepone 'sudo ' a la línea actual
+# Magic Sudo Widget: Prepends/Removes 'sudo ' on Current Buffer
 magic-sudo() {
   [[ -z $BUFFER ]] && zle up-history
   if [[ $BUFFER != sudo\ * ]]; then
@@ -24,9 +24,9 @@ magic-sudo() {
 }
 zle -N magic-sudo
 
-# Hook de inicialización de Vi-Mode (se ejecuta DESPUÉS de que zsh-vi-mode carga)
+# Vi-Mode Post-Initialization Hook (Executes AFTER zsh-vi-mode loads)
 zvm_after_init() {
-  # --- Integración con Atuin ---
+  # --- Atuin Shell History Integration ---
   if (( $+widgets[atuin-search] )); then
     bindkey '^r' atuin-search
     bindkey '^R' atuin-search
@@ -44,20 +44,20 @@ zvm_after_init() {
   bindkey '^[s' magic-sudo
   bindkey '^[S' magic-sudo
 
-  # --- Ctrl+Right / Ctrl+Left -> Salto entre palabras ---
+  # --- Ctrl+Right / Ctrl+Left -> Word Boundary Navigation ---
   bindkey '^[[1;5C' forward-word
   bindkey '^[[1;5D' backward-word
 
-  # --- Alt+Right -> Aceptar una palabra de la autosugerencia ---
+  # --- Alt+Right -> Accept Single Token of Auto-Suggestion ---
   bindkey '^[^[[C' forward-word
 
-  # --- Ctrl+F -> FZF selector de archivos (sin archivos ocultos) ---
+  # --- Ctrl+F -> FZF File Finder (Excluding Hidden Files) ---
   bindkey '^F' _fzf_file_no_hidden
 
-  # --- Ctrl+\ -> Activar / desactivar autosugerencias ---
+  # --- Ctrl+\ -> Toggle Auto-Suggestions Visibility ---
   bindkey '^\' autosuggest-toggle
 
-  # --- Flechas Arriba/Abajo (fallback si no está atuin) ---
+  # --- Up/Down Navigation (Fallback when Atuin is not installed) ---
   if ! (( $+widgets[atuin-search] )); then
     bindkey '^[[A' history-substring-search-up
     bindkey '^[[B' history-substring-search-down

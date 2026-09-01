@@ -3,7 +3,7 @@
 # Engines: ffmpeg & yt-dlp + Smart Multi-Platform Resolvers
 # =========================================================
 
-# --- Helper interno: Resolver de contingencia para Twitter, TikTok y Kick ---
+# --- Internal Helper: Multi-Platform Fallback Resolver (Twitter/X, TikTok, Kick) ---
 _vdl_fallback_resolve() {
   local target_url="$1"
   python3 -c "
@@ -11,7 +11,7 @@ import urllib.request, json, re, sys
 
 url = sys.argv[1].strip()
 
-# 1. Resolver Twitter/X (Videos largos, NSFW o restringidos)
+# 1. Resolve Twitter/X (Long, Sensitive, NSFW or Amplify Videos)
 if 'x.com' in url or 'twitter.com' in url:
     m = re.search(r'status/(\d+)', url)
     if m:
@@ -34,7 +34,7 @@ if 'x.com' in url or 'twitter.com' in url:
             except Exception:
                 pass
 
-# 2. Resolver TikTok (Bypass Anti-Bot y sin marca de agua)
+# 2. Resolve TikTok (Anti-Bot Bypass & Clean No-Watermark MP4)
 if 'tiktok.com' in url:
     try:
         req = urllib.request.Request(f'https://www.tikwm.com/api/?url={url}', headers={'User-Agent': 'Mozilla/5.0'})
@@ -49,9 +49,8 @@ if 'tiktok.com' in url:
     except Exception:
         pass
 
-# 3. Resolver Kick.com (VODs y Clips HLS)
+# 3. Resolve Kick.com (VODs & HLS Streams)
 if 'kick.com' in url:
-    # Caso 1: kick.com/<channel>/videos/<uuid>
     m_vod = re.search(r'kick\.com/([^/?#]+)/videos/([a-zA-Z0-9-]+)', url)
     if m_vod:
         channel, uuid = m_vod.group(1), m_vod.group(2)
@@ -72,7 +71,6 @@ if 'kick.com' in url:
         except Exception:
             pass
 
-    # Caso 2: kick.com/video/<uuid>
     m_single = re.search(r'kick\.com/video/([a-zA-Z0-9-]+)', url)
     if m_single:
         uuid = m_single.group(1)
@@ -93,11 +91,12 @@ print('NOT_RESOLVED')
 " "$target_url" 2>/dev/null || echo "NOT_RESOLVED"
 }
 
-# 1. vconv: Convertidor universal de formatos de video (Soporta archivos individuales y lotes)
-# Uso: vconv [-f] <archivo(s)> <formato_destino>
-# Ejemplo: vconv video.webm mp4
-# Ejemplo lote: vconv *.webm mp4
-# Ejemplo rápido (stream copy sin re-render): vconv -f video.mkv mp4
+# 1. vconv: Universal Video Format Transcoder (Single & Batch File Processing)
+# Usage: vconv [-f] <input_file(s)> <target_extension>
+# Examples:
+#   vconv video.webm mp4
+#   vconv *.webm mp4
+#   vconv -f video.mkv mp4   (Fast stream copy without re-encoding)
 vconv() {
   if ! command -v ffmpeg >/dev/null 2>&1; then
     echo "[ERROR] ffmpeg is not installed."
@@ -180,10 +179,10 @@ vconv() {
   echo "[INFO] Conversion complete: $success succeeded, $failed failed."
 }
 
-# 2. vdl: Descargador universal de video (YouTube, Twitter/X, TikTok, Instagram, Reddit, Twitch, Kick, Vimeo, etc.)
-# Formatos soportados: mp4, mkv, webm, mov, avi
-# Códecs soportados: av1, h264, vp9, hevc
-# Uso: vdl "<url>" [-f <format>] [-q <resolution>] [-c <codec>] [-p] [-o <output_name>]
+# 2. vdl: Universal Video Downloader (YouTube, Twitter/X, TikTok, Instagram, Reddit, Twitch, Kick, Vimeo, etc.)
+# Supported Formats: mp4, mkv, webm, mov, avi
+# Supported Codecs: av1, h264, vp9, hevc
+# Usage: vdl "<url>" [-f <format>] [-q <resolution>] [-c <codec>] [-p] [-o <output_name>]
 vdl() {
   if ! command -v yt-dlp >/dev/null 2>&1; then
     echo "[ERROR] yt-dlp is not installed."
@@ -210,7 +209,7 @@ vdl() {
   local raw_url="$1"
   shift
 
-  # Normalización previa de la URL
+  # Pre-sanitize URL
   local clean_url="$raw_url"
   if [[ "$raw_url" =~ (x\.com|twitter\.com) ]]; then
     clean_url=$(echo "$raw_url" | sed -E 's#/video/[0-9]+##g; s#\?.*##g')
@@ -256,7 +255,7 @@ vdl() {
     custom_output="${user_custom_output}.%(ext)s"
   fi
 
-  # Construir selector de formato inteligente
+  # Build Intelligent Format Selector
   local vcodec_filter=""
   case "$preferred_codec" in
     av1|av01)
@@ -309,7 +308,7 @@ vdl() {
       return 0
   fi
 
-  # --- Contingencia Automática (Smart Fallback) ---
+  # --- Automatic Contingency Engine (Smart Fallback) ---
   echo "[INFO] Direct scraping failed. Activating multi-platform smart fallback..."
   local fallback_result="$(_vdl_fallback_resolve "$raw_url")"
 
@@ -343,9 +342,9 @@ vdl() {
   return 1
 }
 
-# 3. adl: Descargador universal de audio (MP3 en alta calidad 320kbps con carátula)
-# Uso: adl "<url>"
-# Ejemplo: adl "https://www.youtube.com/watch?v=..."
+# 3. adl: Universal Audio Downloader (320kbps MP3 with Embedded Artwork & Metadata)
+# Usage: adl "<url>"
+# Example: adl "https://www.youtube.com/watch?v=..."
 adl() {
   if ! command -v yt-dlp >/dev/null 2>&1; then
     echo "[ERROR] yt-dlp is not installed."
@@ -378,10 +377,11 @@ adl() {
   fi
 }
 
-# 4. vaudio: Extrae la pista de audio de un video local a MP3
-# Uso: vaudio <video_file(s)>
-# Ejemplo: vaudio video.mp4
-# Ejemplo: vaudio *.webm
+# 4. vaudio: Local Video Audio Extractor (Outputs MP3)
+# Usage: vaudio <video_file(s)>
+# Examples:
+#   vaudio video.mp4
+#   vaudio *.webm
 vaudio() {
   if ! command -v ffmpeg >/dev/null 2>&1; then
     echo "[ERROR] ffmpeg is not installed."
@@ -412,9 +412,10 @@ vaudio() {
   done
 }
 
-# 5. vcut: Recorte instantáneo de video sin pérdida de calidad (-c copy)
-# Uso: vcut <video_file> <start_time> <end_time> [output_file]
-# Ejemplo: vcut video.mp4 00:01:30 00:02:45 clip.mp4
+# 5. vcut: Instant Lossless Video Trimmer (-c copy)
+# Usage: vcut <input_video> <start_time> <end_time> [output_video]
+# Time Format: HH:MM:SS or MM:SS or seconds (e.g. 00:01:30 or 90)
+# Example: vcut video.mp4 00:01:30 00:02:45 clip.mp4
 vcut() {
   if ! command -v ffmpeg >/dev/null 2>&1; then
     echo "[ERROR] ffmpeg is not installed."
@@ -448,10 +449,11 @@ vcut() {
   fi
 }
 
-# 6. vgif: Creador de GIFs de alta calidad con algoritmo de dos pasadas (palettegen)
-# Uso: vgif <input_video> [output.gif] [fps] [width]
-# Ejemplo: vgif video.mp4
-# Ejemplo: vgif video.mp4 animacion.gif 15 480
+# 6. vgif: High-Quality Animated GIF Generator (2-Pass Optimized Palette)
+# Usage: vgif <input_video> [output.gif] [fps] [width]
+# Examples:
+#   vgif video.mp4
+#   vgif video.mp4 animation.gif 15 480
 vgif() {
   if ! command -v ffmpeg >/dev/null 2>&1; then
     echo "[ERROR] ffmpeg is not installed."
@@ -461,7 +463,7 @@ vgif() {
   if [ -z "$1" ]; then
     echo "Usage: vgif <input_video> [output.gif] [fps=15] [width=480]"
     echo "Example: vgif video.mp4"
-    echo "Example: vgif video.mp4 animacion.gif 20 640"
+    echo "Example: vgif video.mp4 animation.gif 20 640"
     return 1
   fi
 

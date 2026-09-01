@@ -26,17 +26,17 @@ elif [ -d "$HOME/.nvm" ]; then
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 fi
 
-# Zoxide
+# Zoxide (Smart cd Replacement)
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
 fi
 
-# The Fuck
+# The Fuck (CLI Auto-Correction)
 if command -v thefuck >/dev/null 2>&1; then
   eval "$(thefuck --alias)"
 fi
 
-# Railway
+# Railway CLI
 [ -f "$HOME/.railway/env" ] && source "$HOME/.railway/env"
 
 # Google Cloud SDK

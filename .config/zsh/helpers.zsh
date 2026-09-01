@@ -2,12 +2,12 @@
 # ~/.config/zsh/helpers.zsh - Universal Helper Functions
 # =========================================================
 
-# 1. take: crea uno o varios directorios y entra inmediatamente en el último
+# 1. take: Create one or multiple directories and navigate immediately into the last one
 take() {
   mkdir -p "$@" && cd "$_";
 }
 
-# 2. extract: descompresor universal multi-archivo y por lotes
+# 2. extract: Universal single-file and batch archive extractor
 extract() {
   if [ $# -eq 0 ]; then
     echo "Usage: extract <archive1> [archive2 ...]"

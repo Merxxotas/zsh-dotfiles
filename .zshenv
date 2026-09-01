@@ -2,12 +2,12 @@
 # ~/.zshenv - Root Fallback ZDOTDIR Redirection
 # =========================================================
 
-# Fallback universal para TERM (resuelve duplicación de caracteres en Ghostty / Kitty sobre SSH)
+# Universal TERM fallback (prevents character duplication over SSH from Ghostty / Kitty)
 if ! infocmp "$TERM" >/dev/null 2>&1; then
   export TERM="xterm-256color"
 fi
 
-# Redirección de ZDOTDIR al estándar XDG ~/.config/zsh
+# Redirect ZDOTDIR to standard XDG path ~/.config/zsh
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 if [[ -d "$XDG_CONFIG_HOME/zsh" ]]; then
