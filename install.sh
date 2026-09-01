@@ -72,7 +72,7 @@ install_packages() {
     ubuntu|debian|pop|linuxmint)
       echo -e "[INFO] Installing packages via apt..."
       run_sudo apt-get update -y || true
-      run_sudo apt-get install -y zsh fzf bat fd-find curl git jq neovim unzip tar || true
+      run_sudo apt-get install -y zsh fzf bat fd-find curl git jq neovim unzip tar ffmpeg yt-dlp || true
       mkdir -p "$HOME/.local/bin"
       if command -v batcat >/dev/null 2>&1; then
         ln -sf "$(which batcat)" "$HOME/.local/bin/bat" || true
@@ -85,23 +85,23 @@ install_packages() {
       ;;
     arch|cachyos|manjaro|endeavouros)
       echo -e "[INFO] Installing packages via pacman..."
-      run_sudo pacman -S --needed --noconfirm zsh fzf bat eza fd curl git neovim jq atuin unzip tar || true
+      run_sudo pacman -S --needed --noconfirm zsh fzf bat eza fd curl git neovim jq atuin unzip tar ffmpeg yt-dlp || true
       ;;
     fedora|rhel|centos|rocky|almalinux)
       echo -e "[INFO] Installing packages via dnf..."
-      run_sudo dnf install -y --allowerasing zsh fzf bat eza fd-find curl git neovim jq atuin unzip tar || true
+      run_sudo dnf install -y --allowerasing zsh fzf bat eza fd-find curl git neovim jq atuin unzip tar ffmpeg yt-dlp || true
       if command -v fdfind >/dev/null 2>&1; then
         run_sudo ln -sf "$(which fdfind)" "/usr/local/bin/fd" 2>/dev/null || true
       fi
       ;;
     opensuse*|suse)
       echo -e "[INFO] Installing packages via zypper..."
-      run_sudo zypper --non-interactive install -y zsh fzf bat eza fd curl git neovim jq atuin unzip tar || true
+      run_sudo zypper --non-interactive install -y zsh fzf bat eza fd curl git neovim jq atuin unzip tar ffmpeg yt-dlp || true
       ;;
     alpine)
       echo -e "[INFO] Installing packages via apk..."
       run_sudo apk update || true
-      run_sudo apk add zsh fzf bat eza fd curl git neovim jq unzip tar shadow || true
+      run_sudo apk add zsh fzf bat eza fd curl git neovim jq unzip tar shadow ffmpeg yt-dlp || true
       ;;
     gentoo)
       echo -e "[INFO] Checking packages for Gentoo..."
@@ -117,7 +117,7 @@ install_packages() {
       ;;
     macos)
       echo -e "[INFO] Installing packages via brew..."
-      brew install zsh fzf bat eza fd curl git neovim jq atuin || true
+      brew install zsh fzf bat eza fd curl git neovim jq atuin ffmpeg yt-dlp || true
       ;;
     *)
       echo -e "${RED}[WARN] Generic Linux environment detected. Continuing with available binaries...${NC}"
@@ -143,6 +143,15 @@ if ! command -v eza >/dev/null 2>&1 && [[ "$OS" =~ ^(ubuntu|debian|pop|linuxmint
   run_sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list 2>/dev/null || true
   run_sudo apt-get update -y >/dev/null 2>&1 || true
   run_sudo apt-get install -y eza >/dev/null 2>&1 || true
+fi
+
+# Install yt-dlp standalone if missing
+if ! command -v yt-dlp >/dev/null 2>&1; then
+  echo -e "[INFO] Installing yt-dlp standalone binary..."
+  mkdir -p "$HOME/.local/bin"
+  curl -sL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o "$HOME/.local/bin/yt-dlp" 2>/dev/null || true
+  chmod a+rx "$HOME/.local/bin/yt-dlp" 2>/dev/null || true
+  run_sudo cp "$HOME/.local/bin/yt-dlp" /usr/local/bin/ 2>/dev/null || true
 fi
 
 # Install Oh-My-Posh if missing
@@ -193,6 +202,9 @@ if [[ "$sync_root" =~ ^[sSyY]$ ]]; then
   run_sudo cp "$HOME/.zshenv" /root/.zshenv
   if [[ -f "$HOME/.local/bin/oh-my-posh" ]]; then
     run_sudo cp "$HOME/.local/bin/oh-my-posh" /usr/local/bin/ 2>/dev/null || true
+  fi
+  if [[ -f "$HOME/.local/bin/yt-dlp" ]]; then
+    run_sudo cp "$HOME/.local/bin/yt-dlp" /usr/local/bin/ 2>/dev/null || true
   fi
   run_sudo chown -R root:root /root/.config/zsh /root/.local/state/zsh /root/.cache/zsh /root/.zshenv 2>/dev/null || true
   run_sudo chmod -R go-w /root/.config/zsh 2>/dev/null || true

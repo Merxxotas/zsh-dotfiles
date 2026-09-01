@@ -52,6 +52,7 @@ fi
 # --- Módulos del Super Perfil ---
 source "$ZDOTDIR/fzf.zsh"
 source "$ZDOTDIR/helpers.zsh"
+source "$ZDOTDIR/media.zsh"
 source "$ZDOTDIR/plugins.zsh"
 source "$ZDOTDIR/aliases.zsh"
 source "$ZDOTDIR/bindings.zsh"

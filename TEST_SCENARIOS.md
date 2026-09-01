@@ -25,7 +25,34 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 2: Oh-My-Posh Theme Management (`posh-theme`)
+### Scenario 2: Universal Multimedia Suite (`media.zsh`)
+*Objective: Verify video conversion, universal downloading, audio extraction, trimming, and GIF creation.*
+
+1. **Universal Video Transcoding (`vconv`)**:
+   - Command: `vconv video.webm mp4` or batch `vconv *.webm mp4`
+   - Acceptance Criteria: Converts video with H.264/AAC at high visual quality (`crf 18`).
+2. **Fast Stream Copy (`vconv -f`)**:
+   - Command: `vconv -f video.mkv mp4`
+   - Acceptance Criteria: Instantly switches container format without re-rendering in under 1 second.
+3. **Universal Web Video Download (`vdl`)**:
+   - Command: `vdl "https://www.youtube.com/watch?v=..."` or `vdl "https://x.com/..."`
+   - Acceptance Criteria: Downloads video in MP4 container with concurrent fragments, embedded metadata, and thumbnail.
+4. **Universal Web Audio Download (`adl`)**:
+   - Command: `adl "https://www.youtube.com/watch?v=..."`
+   - Acceptance Criteria: Extracts 320kbps MP3 audio with embedded ID3 tags and album art.
+5. **Local Audio Extraction (`vaudio`)**:
+   - Command: `vaudio video.mp4`
+   - Acceptance Criteria: Extracts audio track into `video.mp3` with high quality VBR.
+6. **Lossless Video Trimming (`vcut`)**:
+   - Command: `vcut video.mp4 00:01:00 00:02:30 clip.mp4`
+   - Acceptance Criteria: Cuts video between timestamps without re-encoding.
+7. **High-Quality GIF Generator (`vgif`)**:
+   - Command: `vgif video.mp4 animation.gif 15 480`
+   - Acceptance Criteria: Uses 2-pass `palettegen` to generate clean, unpixelated GIF animation.
+
+---
+
+### Scenario 3: Oh-My-Posh Theme Management (`posh-theme`)
 *Objective: Verify dynamic theme switching, remote downloads, and persistence.*
 
 1. **Interactive Selection**:
@@ -42,7 +69,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 3: Real-Time Abbreviations (`zsh-abbr`)
+### Scenario 4: Real-Time Abbreviations (`zsh-abbr`)
 *Objective: Verify expansion behavior and explicit history persistence.*
 
 1. Type `gs` and press `Space` -> Expands to `git status -s`.
@@ -54,7 +81,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 4: Magic Sudo (`Alt+S`)
+### Scenario 5: Magic Sudo (`Alt+S`)
 *Objective: Validate prefixing and removing sudo dynamically.*
 
 1. Type: `pacman -Syu` or `apt update` (do not press Enter).
@@ -63,7 +90,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 5: Didactic Alias Reminder (`zsh-you-should-use`)
+### Scenario 6: Didactic Alias Reminder (`zsh-you-should-use`)
 *Objective: Verify suggestions when explicit long commands are typed.*
 
 1. Inside a Git repository, type: `git status -s` and press `Enter`.
@@ -71,7 +98,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 6: Atuin History and TUI Exploration
+### Scenario 7: Atuin History and TUI Exploration
 *Objective: Validate shell history retrieval and interactive search.*
 
 1. Press `Ctrl + R` or `Up Arrow`.
@@ -80,7 +107,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 7: Autopair Execution
+### Scenario 8: Autopair Execution
 *Objective: Validate automatic matching and deletion of paired delimiters.*
 
 1. Type `"` -> Line buffer contains `""` with cursor positioned between quotes.
@@ -89,7 +116,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 8: Vi-Mode and Cursor States
+### Scenario 9: Vi-Mode and Cursor States
 *Objective: Validate modal editing and cursor geometry.*
 
 1. Type in command buffer -> Cursor is displayed as a vertical beam (`|`).
@@ -99,7 +126,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 9: Universal Helpers (`take` and `extract`)
+### Scenario 10: Universal Helpers (`take` and `extract`)
 *Objective: Verify single-file and batch multi-archive extraction.*
 
 1. **Directory traversal (`take`)**:
@@ -114,7 +141,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 10: Fuzzy File Finders
+### Scenario 11: Fuzzy File Finders
 *Objective: Validate FZF integration.*
 
 1. Press `Ctrl + F` -> Launches file search excluding hidden files with bat preview.
@@ -122,7 +149,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 11: Plugin Updates
+### Scenario 12: Plugin Updates
 *Objective: Verify parallel Git plugin update mechanism.*
 
 1. Command: `zplugin-update`
