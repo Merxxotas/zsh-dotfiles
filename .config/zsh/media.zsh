@@ -90,10 +90,10 @@ vconv() {
   echo "[INFO] Conversion complete: $success succeeded, $failed failed."
 }
 
-# 2. vdl: Descargador universal de video (YouTube, Twitter/X, TikTok, Instagram, Reddit, Twitch, etc.)
-# Uso: vdl "<url>" [-q <resolution>] [-p] [-o <output_name>]
-# Ejemplo: vdl "https://www.youtube.com/watch?v=..."
-# Ejemplo: vdl "https://x.com/user/status/..."
+# 2. vdl: Descargador universal de video (YouTube, Twitter/X, TikTok, Instagram, Reddit, Twitch, Vimeo, etc.)
+# Formatos soportados: mp4, mkv, webm, mov, avi
+# Códecs soportados: av1, h264, vp9, hevc
+# Uso: vdl "<url>" [-f <format>] [-q <resolution>] [-c <codec>] [-p] [-o <output_name>]
 vdl() {
   if ! command -v yt-dlp >/dev/null 2>&1; then
     echo "[ERROR] yt-dlp is not installed."
@@ -103,27 +103,41 @@ vdl() {
   if [ -z "$1" ]; then
     echo "Usage: vdl <url> [options]"
     echo "Options:"
-    echo "  -q, --quality <height>   Max vertical resolution (e.g. 1080, 720, 480)"
+    echo "  -f, --format <ext>       Target format container (mp4, mkv, webm, mov, avi) [default: mp4]"
+    echo "  -q, --quality <height>   Max vertical resolution (e.g. 2160, 1440, 1080, 720, 480)"
+    echo "  -c, --codec <codec>      Preferred video codec (av1, h264, vp9, hevc)"
     echo "  -p, --playlist           Download entire playlist (disabled by default)"
     echo "  -o, --output <name>      Custom output filename template"
     echo "Examples:"
     echo "  vdl \"https://www.youtube.com/watch?v=...\""
-    echo "  vdl \"https://x.com/user/status/...\""
-    echo "  vdl \"https://www.youtube.com/watch?v=...\" -q 720"
+    echo "  vdl \"https://www.youtube.com/watch?v=...\" -f mkv"
+    echo "  vdl \"https://www.youtube.com/watch?v=...\" -f webm -c av1"
+    echo "  vdl \"https://x.com/user/status/...\" -f mp4"
     return 1
   fi
 
   local url="$1"
   shift
 
+  local target_format="mp4"
   local max_res=""
+  local preferred_codec=""
   local playlist_flag="--no-playlist"
   local custom_output="%(title)s.%(ext)s"
 
   while [ $# -gt 0 ]; do
     case "$1" in
+      -f|--format)
+        target_format="${2#.}"
+        target_format="${target_format:l}"
+        shift 2
+        ;;
       -q|--quality)
         max_res="$2"
+        shift 2
+        ;;
+      -c|--codec)
+        preferred_codec="${2:l}"
         shift 2
         ;;
       -p|--playlist)
@@ -140,17 +154,50 @@ vdl() {
     esac
   done
 
-  local format_selector="bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b"
+  # Construir selector de formato inteligente
+  local vcodec_filter=""
+  case "$preferred_codec" in
+    av1|av01)
+      vcodec_filter="[vcodec^=av01]"
+      ;;
+    h264|avc|avc1)
+      vcodec_filter="[vcodec^=avc|vcodec^=h264]"
+      ;;
+    vp9|vp09)
+      vcodec_filter="[vcodec^=vp09|vcodec^=vp9]"
+      ;;
+    hevc|h265|hev1|hvc1)
+      vcodec_filter="[vcodec^=hev|vcodec^=hvc|vcodec^=h265]"
+      ;;
+  esac
+
+  local res_filter=""
   if [ -n "$max_res" ]; then
-    format_selector="bv*[height<=${max_res}][ext=mp4]+ba[ext=m4a]/b[height<=${max_res}][ext=mp4] / bv*[height<=${max_res}]+ba/b[height<=${max_res}]"
+    res_filter="[height<=${max_res}]"
   fi
 
-  echo "[INFO] Downloading video from '$url'..."
+  local format_selector=""
+  if [ -n "$vcodec_filter" ] || [ -n "$res_filter" ]; then
+    format_selector="bv*${vcodec_filter}${res_filter}+ba/b${vcodec_filter}${res_filter}/bv*${res_filter}+ba/b"
+  else
+    if [ "$target_format" = "webm" ]; then
+      format_selector="bv*[ext=webm]+ba[ext=webm]/bv*+ba/b"
+    else
+      format_selector="bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b"
+    fi
+  fi
+
+  local thumbnail_flag="--embed-thumbnail"
+  if [ "$target_format" = "webm" ]; then
+    thumbnail_flag=""
+  fi
+
+  echo "[INFO] Downloading video in '$target_format' format from '$url'..."
   yt-dlp \
     -f "$format_selector" \
-    --merge-output-format mp4 \
+    --merge-output-format "$target_format" \
     --concurrent-fragments 5 \
-    --embed-thumbnail \
+    $thumbnail_flag \
     --embed-metadata \
     --windows-filenames \
     $playlist_flag \
@@ -158,7 +205,7 @@ vdl() {
     "$url"
 
   if [ $? -eq 0 ]; then
-    echo "[OK] Download completed successfully."
+    echo "[OK] Download completed successfully in '$target_format' format."
   else
     echo "[ERROR] Download failed."
     return 1
