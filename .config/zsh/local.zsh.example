@@ -1,0 +1,32 @@
+# =========================================================
+# ~/.config/zsh/local.zsh - Host-Specific & Private Overrides
+# Copy this file to ~/.config/zsh/local.zsh to customize your
+# environment without committing secrets or changes to Git.
+# =========================================================
+
+# --- Multimedia & Third-Party API Keys ---
+# Generate Giphy API Key at: https://developers.giphy.com/
+# export GIPHY_API_KEY="your_giphy_api_key_here"
+
+# Generate Klipy API Key at: https://klipy.co/
+# export KLIPY_API_KEY="your_klipy_api_key_here"
+
+# --- Machine-Specific PATH & Variables ---
+# export LIBVIRT_DEFAULT_URI="qemu:///system"
+# export QML2_IMPORT_PATH="$HOME/.local/lib/qt6/qml"
+# export CAELESTIA_LIB_DIR="$HOME/.local/lib/caelestia"
+
+# --- Context-Aware GitHub CLI Switcher ---
+# gh() {
+#   case "$PWD/" in
+#     "$HOME/Work/"*)
+#       GH_CONFIG_DIR="$HOME/.config/gh-work" command gh "$@" ;;
+#     *)
+#       command gh "$@" ;;
+#   esac
+# }
+
+# --- Custom Shell Hooks / Word of the Day ---
+# if [[ -f "$HOME/.vocab" ]]; then
+#   "$HOME/.vocab" || true
+# fi

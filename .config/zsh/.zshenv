@@ -45,8 +45,7 @@ esac
 
 # System and Application Variables
 export LIBVIRT_DEFAULT_URI="qemu:///system"
-
-
 export QML2_IMPORT_PATH="$HOME/.local/lib/qt6/qml"
 export CAELESTIA_LIB_DIR="$HOME/.local/lib/caelestia"
 export ENDCORD_VOICE_OPUS_MODE="audio"
+

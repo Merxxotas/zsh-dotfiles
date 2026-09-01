@@ -14,3 +14,13 @@ plugins/
 .local/
 history
 *.log
+
+# Local private overrides, secrets and current theme
+.config/zsh/local.zsh
+.config/zsh/secrets.zsh
+.config/zsh/current_theme
+local.zsh
+secrets.zsh
+*.local.zsh
+.env*
+
