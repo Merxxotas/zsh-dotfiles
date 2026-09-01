@@ -54,6 +54,14 @@ fi
 
 compdef eza=ls 2>/dev/null
 
+# Portable color flag detection for BSD / macOS / Linux
+_LS_COLOR_FLAG=""
+if command ls --color=auto /dev/null >/dev/null 2>&1; then
+  _LS_COLOR_FLAG="--color=auto"
+elif command ls -G /dev/null >/dev/null 2>&1; then
+  _LS_COLOR_FLAG="-G"
+fi
+
 unalias ls 2>/dev/null
 ls() {
   if command -v eza >/dev/null 2>&1; then
@@ -63,8 +71,10 @@ ls() {
       *)
         command eza -lH --icons --group-directories-first --git "$@" ;;
     esac
+  elif [[ -n "$_LS_COLOR_FLAG" ]]; then
+    command ls $_LS_COLOR_FLAG "$@"
   else
-    command ls --color=auto "$@"
+    command ls "$@"
   fi
 }
 
@@ -90,12 +100,14 @@ elif command -v batcat >/dev/null 2>&1; then
   alias cat='batcat'
 fi
 
+# Detect grep / diff color support portably
+if grep --color=auto "" /dev/null >/dev/null 2>&1 || [ $? -le 1 ]; then
+  alias grep='grep --color=auto'
+fi
 if diff --color=auto /dev/null /dev/null >/dev/null 2>&1; then
   alias diff='diff --color=auto'
 fi
-if grep --color=auto "" /dev/null >/dev/null 2>&1; then
-  alias grep='grep --color=auto'
-fi
+
 alias df='df -h'
 alias vim='nvim'
 
@@ -140,4 +152,3 @@ clean_clear() {
   return 0
 }
 alias clear=clean_clear
-

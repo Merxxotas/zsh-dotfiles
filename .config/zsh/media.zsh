@@ -223,20 +223,36 @@ vdl() {
   local preferred_codec=""
   local playlist_flag="--no-playlist"
   local user_custom_output=""
+  local allow_quality_fallback=false
 
   while [ $# -gt 0 ]; do
     case "$1" in
       -f|--format)
+        (( $# >= 2 )) || { echo "[ERROR] Missing value for $1" >&2; return 2; }
         target_format="${2#.}"
         target_format="${target_format:l}"
+        case "$target_format" in
+          mp4|mkv|webm|mov|avi) ;;
+          *) echo "[ERROR] Unsupported format: '$target_format'. Allowed: mp4, mkv, webm, mov, avi" >&2; return 2 ;;
+        esac
         shift 2
         ;;
       -q|--quality)
+        (( $# >= 2 )) || { echo "[ERROR] Missing value for $1" >&2; return 2; }
+        if [[ ! "$2" =~ ^[0-9]+$ ]]; then
+          echo "[ERROR] Invalid quality '$2'. Expected a positive integer (e.g. 1080, 720)." >&2
+          return 2
+        fi
         max_res="$2"
         shift 2
         ;;
       -c|--codec)
+        (( $# >= 2 )) || { echo "[ERROR] Missing value for $1" >&2; return 2; }
         preferred_codec="${2:l}"
+        case "$preferred_codec" in
+          av1|av01|h264|avc|avc1|vp9|vp09|hevc|h265|hev1|hvc1) ;;
+          *) echo "[ERROR] Unsupported codec: '$preferred_codec'. Allowed: av1, h264, vp9, hevc" >&2; return 2 ;;
+        esac
         shift 2
         ;;
       -p|--playlist)
@@ -244,8 +260,22 @@ vdl() {
         shift
         ;;
       -o|--output)
+        (( $# >= 2 )) || { echo "[ERROR] Missing value for $1" >&2; return 2; }
+        [[ -z "$2" ]] && { echo "[ERROR] Output name cannot be empty" >&2; return 2; }
         user_custom_output="$2"
         shift 2
+        ;;
+      --allow-quality-fallback)
+        allow_quality_fallback=true
+        shift
+        ;;
+      --)
+        shift
+        break
+        ;;
+      -*)
+        echo "[ERROR] Unknown option: $1" >&2
+        return 2
         ;;
       *)
         shift
@@ -259,28 +289,36 @@ vdl() {
   fi
 
   local res_filter=""
+  local fallback_res=""
   if [ -n "$max_res" ]; then
     res_filter="[height<=${max_res}]"
+    if [ "$allow_quality_fallback" = true ]; then
+      fallback_res="/bv*+ba/b"
+    else
+      fallback_res="/bv*${res_filter}+ba/b${res_filter}"
+    fi
+  else
+    fallback_res="/bv*+ba/b"
   fi
 
   # Build Intelligent Format Selector
   local format_selector=""
   case "$preferred_codec" in
     av1|av01)
-      format_selector="bv*[vcodec^=av01]${res_filter}+ba/b[vcodec^=av01]${res_filter}/bv*${res_filter}+ba/b"
+      format_selector="bv*[vcodec^=av01]${res_filter}+ba/b[vcodec^=av01]${res_filter}${fallback_res}"
       ;;
     h264|avc|avc1)
-      format_selector="bv*[vcodec^=avc]${res_filter}+ba/bv*[vcodec^=h264]${res_filter}+ba/b[vcodec^=avc]${res_filter}/b[vcodec^=h264]${res_filter}/bv*${res_filter}+ba/b"
+      format_selector="bv*[vcodec^=avc]${res_filter}+ba/bv*[vcodec^=h264]${res_filter}+ba/b[vcodec^=avc]${res_filter}/b[vcodec^=h264]${res_filter}${fallback_res}"
       ;;
     vp9|vp09)
-      format_selector="bv*[vcodec^=vp09]${res_filter}+ba/bv*[vcodec^=vp9]${res_filter}+ba/b[vcodec^=vp09]${res_filter}/b[vcodec^=vp9]${res_filter}/bv*${res_filter}+ba/b"
+      format_selector="bv*[vcodec^=vp09]${res_filter}+ba/bv*[vcodec^=vp9]${res_filter}+ba/b[vcodec^=vp09]${res_filter}/b[vcodec^=vp9]${res_filter}${fallback_res}"
       ;;
     hevc|h265|hev1|hvc1)
-      format_selector="bv*[vcodec^=hev]${res_filter}+ba/bv*[vcodec^=hvc]${res_filter}+ba/bv*[vcodec^=h265]${res_filter}+ba/b[vcodec^=hev]${res_filter}/b[vcodec^=hvc]${res_filter}/b[vcodec^=h265]${res_filter}/bv*${res_filter}+ba/b"
+      format_selector="bv*[vcodec^=hev]${res_filter}+ba/bv*[vcodec^=hvc]${res_filter}+ba/bv*[vcodec^=h265]${res_filter}+ba/b[vcodec^=hev]${res_filter}/b[vcodec^=hvc]${res_filter}/b[vcodec^=h265]${res_filter}${fallback_res}"
       ;;
     *)
       if [ -n "$res_filter" ]; then
-        format_selector="bv*${res_filter}+ba/b${res_filter}/bv*+ba/b"
+        format_selector="bv*${res_filter}+ba/b${res_filter}${fallback_res}"
       elif [ "$target_format" = "webm" ]; then
         format_selector="bv*[ext=webm]+ba[ext=webm]/bv*+ba/b"
       else
