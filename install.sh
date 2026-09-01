@@ -32,6 +32,7 @@ run_sudo() {
 # --- Argument Parsing ---
 UNATTENDED=false
 USE_SYMLINK=false
+SKIP_DEPS=false
 for arg in "$@"; do
   case "$arg" in
     -y|--yes|--unattended|--non-interactive)
@@ -40,11 +41,15 @@ for arg in "$@"; do
     -s|--symlink)
       USE_SYMLINK=true
       ;;
+    --no-deps|--skip-deps)
+      SKIP_DEPS=true
+      ;;
     -h|--help)
       echo "Usage: ./install.sh [OPTIONS]"
       echo "Options:"
       echo "  -y, --yes, --unattended   Execute in non-interactive mode without prompts"
       echo "  -s, --symlink             Link dotfiles directly to repository via symlinks"
+      echo "  --no-deps, --skip-deps    Skip system dependencies and package installation"
       echo "  -h, --help                Show this help message"
       exit 0
       ;;
@@ -81,12 +86,12 @@ install_packages() {
       run_sudo apt-get install -y zsh fzf bat fd-find curl git jq neovim unzip tar ffmpeg yt-dlp || true
       mkdir -p "$HOME/.local/bin"
       if command -v batcat >/dev/null 2>&1; then
-        ln -sf "$(which batcat)" "$HOME/.local/bin/bat" || true
-        run_sudo ln -sf "$(which batcat)" "/usr/local/bin/bat" 2>/dev/null || true
+        ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat" || true
+        run_sudo ln -sf "$(command -v batcat)" "/usr/local/bin/bat" 2>/dev/null || true
       fi
       if command -v fdfind >/dev/null 2>&1; then
-        ln -sf "$(which fdfind)" "$HOME/.local/bin/fd" || true
-        run_sudo ln -sf "$(which fdfind)" "/usr/local/bin/fd" 2>/dev/null || true
+        ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd" || true
+        run_sudo ln -sf "$(command -v fdfind)" "/usr/local/bin/fd" 2>/dev/null || true
       fi
       ;;
     arch|cachyos|manjaro|endeavouros)
@@ -131,73 +136,86 @@ install_packages() {
   esac
 }
 
-if [[ "$UNATTENDED" == "true" ]]; then
-  install_packages || true
-else
+INSTALL_DEPS=true
+if [[ "$SKIP_DEPS" == "true" ]]; then
+  INSTALL_DEPS=false
+elif [[ "$UNATTENDED" != "true" ]]; then
   read -r -p "[PROMPT] Install recommended dependencies automatically? (Y/n): " do_install
-  if [[ ! "$do_install" =~ ^[nN]$ ]]; then
-    install_packages
+  if [[ "$do_install" =~ ^[nN]$ ]]; then
+    INSTALL_DEPS=false
   fi
 fi
 
-# Install eza for Ubuntu/Debian if missing
-if ! command -v eza >/dev/null 2>&1 && [[ "$OS" =~ ^(ubuntu|debian|pop|linuxmint)$ ]]; then
-  echo -e "[INFO] Installing eza..."
-  run_sudo mkdir -p /etc/apt/keyrings || true
-  wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | run_sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg 2>/dev/null || true
-  echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | run_sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null 2>&1 || true
-  run_sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list 2>/dev/null || true
-  run_sudo apt-get update -y >/dev/null 2>&1 || true
-  run_sudo apt-get install -y eza >/dev/null 2>&1 || true
+if [[ "$INSTALL_DEPS" == "true" ]]; then
+  install_packages
+
+  # Install eza for Ubuntu/Debian if missing
+  if ! command -v eza >/dev/null 2>&1 && [[ "$OS" =~ ^(ubuntu|debian|pop|linuxmint)$ ]]; then
+    echo -e "[INFO] Installing eza..."
+    run_sudo mkdir -p /etc/apt/keyrings || true
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | run_sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg 2>/dev/null || true
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | run_sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null 2>&1 || true
+    run_sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list 2>/dev/null || true
+    run_sudo apt-get update -y >/dev/null 2>&1 || true
+    run_sudo apt-get install -y eza >/dev/null 2>&1 || true
+  fi
+
+  # Install yt-dlp standalone if missing
+  if ! command -v yt-dlp >/dev/null 2>&1; then
+    echo -e "[INFO] Installing yt-dlp standalone binary..."
+    mkdir -p "$HOME/.local/bin"
+    curl -sL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o "$HOME/.local/bin/yt-dlp" 2>/dev/null || true
+    chmod a+rx "$HOME/.local/bin/yt-dlp" 2>/dev/null || true
+    run_sudo cp "$HOME/.local/bin/yt-dlp" /usr/local/bin/ 2>/dev/null || true
+  fi
+
+  # Install Oh-My-Posh if missing
+  if ! command -v oh-my-posh >/dev/null 2>&1; then
+    echo -e "[INFO] Installing Oh-My-Posh binary..."
+    mkdir -p "$HOME/.local/bin"
+    curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin" 2>/dev/null || true
+    if [[ -f "$HOME/.local/bin/oh-my-posh" ]]; then
+      run_sudo cp "$HOME/.local/bin/oh-my-posh" /usr/local/bin/ 2>/dev/null || true
+    fi
+  fi
+
+  # Install Atuin if missing
+  if ! command -v atuin >/dev/null 2>&1 && [[ ! -f "$HOME/.atuin/bin/atuin" ]]; then
+    echo -e "[INFO] Installing Atuin binary..."
+    curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh 2>/dev/null || true
+    if [[ -f "$HOME/.atuin/bin/atuin" ]]; then
+      run_sudo cp "$HOME/.atuin/bin/atuin" /usr/local/bin/ 2>/dev/null || true
+    fi
+  fi
+else
+  echo -e "[INFO] Skipping automated package downloads as requested."
 fi
 
-# Install yt-dlp standalone if missing
-if ! command -v yt-dlp >/dev/null 2>&1; then
-  echo -e "[INFO] Installing yt-dlp standalone binary..."
-  mkdir -p "$HOME/.local/bin"
-  curl -sL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o "$HOME/.local/bin/yt-dlp" 2>/dev/null || true
-  chmod a+rx "$HOME/.local/bin/yt-dlp" 2>/dev/null || true
-  run_sudo cp "$HOME/.local/bin/yt-dlp" /usr/local/bin/ 2>/dev/null || true
-fi
+# --- 3. Backup Existing Configurations ---
+echo -e "\n${BLUE}${BOLD}[INFO] Checking for existing configurations...${NC}"
+backup_timestamp="$(date +%Y%m%d_%H%M%S)"
 
-# Install Oh-My-Posh if missing
-if ! command -v oh-my-posh >/dev/null 2>&1; then
-  echo -e "[INFO] Installing Oh-My-Posh binary..."
-  mkdir -p "$HOME/.local/bin"
-  curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin" 2>/dev/null || true
-  if [[ -f "$HOME/.local/bin/oh-my-posh" ]]; then
-    run_sudo cp "$HOME/.local/bin/oh-my-posh" /usr/local/bin/ 2>/dev/null || true
+if [[ -e "$HOME/.config/zsh" || -L "$HOME/.config/zsh" ]]; then
+  if ! [[ "$HOME/.config/zsh" -ef "$SCRIPT_DIR/.config/zsh" ]]; then
+    echo -e "  ${YELLOW}[BACKUP]${NC} Backing up existing ~/.config/zsh to ~/.config/zsh.bak.${backup_timestamp}..."
+    cp -r "$HOME/.config/zsh" "$HOME/.config/zsh.bak.${backup_timestamp}"
   fi
 fi
 
-# Install Atuin if missing
-if ! command -v atuin >/dev/null 2>&1 && [[ ! -f "$HOME/.atuin/bin/atuin" ]]; then
-  echo -e "[INFO] Installing Atuin binary..."
-  curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh 2>/dev/null || true
-  if [[ -f "$HOME/.atuin/bin/atuin" ]]; then
-    run_sudo cp "$HOME/.atuin/bin/atuin" /usr/local/bin/ 2>/dev/null || true
+if [[ -e "$HOME/.zshenv" || -L "$HOME/.zshenv" ]]; then
+  if ! [[ "$HOME/.zshenv" -ef "$SCRIPT_DIR/.zshenv" ]]; then
+    echo -e "  ${YELLOW}[BACKUP]${NC} Backing up existing ~/.zshenv to ~/.zshenv.bak.${backup_timestamp}..."
+    cp "$HOME/.zshenv" "$HOME/.zshenv.bak.${backup_timestamp}"
   fi
 fi
 
-# --- 3. XDG Directories Setup ---
-echo -e "\n${BLUE}${BOLD}[INFO] Creating XDG directory hierarchy...${NC}"
+# --- 4. XDG Directories Setup ---
+echo -e "\n${BLUE}${BOLD}[INFO] Initializing XDG directory hierarchy...${NC}"
 mkdir -p "$HOME/.config/zsh/themes" "$HOME/.local/state/zsh" "$HOME/.cache/zsh" "$HOME/.local/bin"
 echo -e "  ${GREEN}[OK]${NC} Base directories initialized."
 
-# --- 4. Deploy Configuration Files ---
+# --- 5. Deploy Configuration Files ---
 echo -e "\n${BLUE}${BOLD}[INFO] Deploying configuration modules...${NC}"
-
-# Backup existing configurations if present and not already symlinked to this repo
-backup_timestamp="$(date +%Y%m%d_%H%M%S)"
-if [[ -d "$HOME/.config/zsh" && ! -L "$HOME/.config/zsh" && ! "$HOME/.config/zsh" -ef "$SCRIPT_DIR/.config/zsh" ]]; then
-  echo -e "  ${YELLOW}[BACKUP]${NC} Backing up existing ~/.config/zsh to ~/.config/zsh.bak.${backup_timestamp}..."
-  cp -r "$HOME/.config/zsh" "$HOME/.config/zsh.bak.${backup_timestamp}"
-fi
-
-if [[ -f "$HOME/.zshenv" && ! -L "$HOME/.zshenv" && ! "$HOME/.zshenv" -ef "$SCRIPT_DIR/.zshenv" ]]; then
-  echo -e "  ${YELLOW}[BACKUP]${NC} Backing up existing ~/.zshenv to ~/.zshenv.bak.${backup_timestamp}..."
-  cp "$HOME/.zshenv" "$HOME/.zshenv.bak.${backup_timestamp}"
-fi
 
 if [[ "$USE_SYMLINK" == "true" ]]; then
   echo -e "  ${BLUE}[INFO]${NC} Creating symbolic links to repository..."
@@ -210,17 +228,16 @@ else
   cp "$SCRIPT_DIR/.config/zsh/.zshenv" "$HOME/.config/zsh/.zshenv"
   cp "$SCRIPT_DIR/.config/zsh/.zshrc" "$HOME/.config/zsh/.zshrc"
   cp "$SCRIPT_DIR/.zshenv" "$HOME/.zshenv"
-fi
-
-if [[ ! -f "$HOME/.config/zsh/local.zsh" && -f "$SCRIPT_DIR/.config/zsh/local.zsh.example" ]]; then
-  cp "$SCRIPT_DIR/.config/zsh/local.zsh.example" "$HOME/.config/zsh/local.zsh.example"
+  if [[ ! -f "$HOME/.config/zsh/local.zsh" && -f "$SCRIPT_DIR/.config/zsh/local.zsh.example" ]]; then
+    cp "$SCRIPT_DIR/.config/zsh/local.zsh.example" "$HOME/.config/zsh/local.zsh.example"
+  fi
 fi
 
 chmod -R go-w "$HOME/.config/zsh" 2>/dev/null || true
 echo -e "  ${GREEN}[OK]${NC} Modules, themes and helpers deployed successfully."
 
 
-# --- 5. Root Configuration (Optional) ---
+# --- 6. Root Configuration (Optional) ---
 sync_root="n"
 if [[ "$UNATTENDED" != "true" ]]; then
   echo -e "\n${BLUE}${BOLD}[INFO] Root user configuration${NC}"
@@ -243,13 +260,13 @@ if [[ "$sync_root" =~ ^[sSyY]$ ]]; then
   echo -e "  ${GREEN}[OK]${NC} Root user configured successfully."
 fi
 
-# --- 6. Set Default Shell ---
+# --- 7. Set Default Shell ---
 CURRENT_SHELL="$(basename "$SHELL")"
 if [[ "$CURRENT_SHELL" != "zsh" && "$UNATTENDED" != "true" ]]; then
   echo -e "\n${BLUE}${BOLD}[INFO] Default Shell Configuration${NC}"
   read -r -p "[PROMPT] Set ZSH as your default login shell? (Y/n): " change_shell
   if [[ ! "$change_shell" =~ ^[nN]$ ]]; then
-    ZSH_PATH="$(which zsh)"
+    ZSH_PATH="$(command -v zsh)"
     run_sudo chsh -s "$ZSH_PATH" "$USER" 2>/dev/null || run_sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null || true
     echo -e "  ${GREEN}[OK]${NC} Default shell changed to $ZSH_PATH."
   fi
