@@ -4,13 +4,17 @@
 
 # 1. take: Create one or multiple directories and navigate immediately into the last one
 take() {
-  mkdir -p "$@" && cd "$_";
+  if [ $# -eq 0 ]; then
+    echo "Usage: take <dir> [dir2 ...]" >&2
+    return 1
+  fi
+  mkdir -p "$@" && cd "$_" || return 1
 }
 
 # 2. extract: Universal single-file and batch archive extractor
 extract() {
   if [ $# -eq 0 ]; then
-    echo "Usage: extract <archive1> [archive2 ...]"
+    echo "Usage: extract <archive1> [archive2 ...]" >&2
     return 1
   fi
 
@@ -20,7 +24,7 @@ extract() {
 
   for file in "$@"; do
     if [ ! -f "$file" ]; then
-      echo "[ERROR] '$file' is not a valid file"
+      echo "[ERROR] '$file' is not a valid file" >&2
       failed=$((failed + 1))
       continue
     fi
@@ -51,7 +55,7 @@ extract() {
         elif command -v bsdtar >/dev/null 2>&1; then
           bsdtar -xf "$file"
         else
-          echo "[ERROR] Unknown format for '$file'"
+          echo "[ERROR] Unknown format for '$file'" >&2
           failed=$((failed + 1))
           continue
         fi
@@ -61,13 +65,19 @@ extract() {
     if [ $? -eq 0 ]; then
       success=$((success + 1))
     else
-      echo "[ERROR] Failed to extract '$file'"
+      echo "[ERROR] Failed to extract '$file'" >&2
       failed=$((failed + 1))
     fi
   done
 
-  echo "[OK] Extracted $success archive(s)."
-  if [ $failed -gt 0 ] || [ $success -eq 0 ]; then
+  if [ $failed -eq 0 ] && [ $success -gt 0 ]; then
+    echo "[OK] Extracted $success archive(s)."
+    return 0
+  elif [ $success -eq 0 ] && [ $failed -gt 0 ]; then
+    echo "[ERROR] Extracted 0 archive(s); $failed failed." >&2
+    return 1
+  else
+    echo "[WARN] Extracted $success archive(s); $failed failed." >&2
     return 1
   fi
 }

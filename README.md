@@ -148,7 +148,7 @@ vgif video.mp4 animation.gif 15 480
 
 ---
 
-## Installation
+## Installation & Deployment
 
 ### 1. Clone the Repository
 
@@ -157,24 +157,53 @@ git clone https://github.com/Merxxotas/zsh-dotfiles.git ~/Projects/zsh-dotfiles
 cd ~/Projects/zsh-dotfiles
 ```
 
-### 2. Execute the Automated Installer
+### 2. Run the Universal Installer
 
-Standard copy deployment (with automated backup of previous configurations):
-
+**Standard Copy Deployment** (recommended for production):
 ```bash
 ./install.sh
 ```
 
-Symlink deployment (recommended for dotfiles development so changes link directly to repo):
-
+**Symlink Deployment** (file-by-file links, recommended for dotfiles development):
 ```bash
+./install.sh --mode symlink
+# or shortcut:
 ./install.sh -s
 ```
 
-Unattended mode for CI and automated server provisioning:
-
+**Non-Interactive Automated Provisioning**:
 ```bash
-./install.sh -y
+./install.sh -y --no-deps
+```
+
+**Dry-Run (inspect installation plan without making changes)**:
+```bash
+./install.sh --dry-run
+```
+
+**Backup Management**:
+```bash
+# List all previous configuration backups
+./install.sh --list-backups
+
+# Restore a specific backup snapshot
+./install.sh --restore <backup_id>
+```
+
+---
+
+## Lockfiles & Deterministic Security
+
+This repository enforces supply chain security and reproducible deployments:
+
+- **[`plugins.lock`](./plugins.lock)**: Pins all 8 ZSH plugins to exact 40-character commit SHAs. Startup executes zero network requests.
+- **[`dependencies.lock`](./dependencies.lock)**: Pins standalone tools (`yt-dlp`, `oh-my-posh`, `atuin`) to verified releases and SHA256 checksums.
+
+To install or sync pinned plugins explicitly:
+```bash
+zplugin-install
+# or during installation:
+./install.sh --install-plugins
 ```
 
 ---
@@ -203,10 +232,9 @@ export GIPHY_API_KEY="your_actual_key_here"
 export KLIPY_API_KEY="your_actual_key_here"
 ```
 
-`~/.config/zsh/local.zsh` is automatically loaded by `.zshrc` and ignored by Git.
+`~/.config/zsh/local.zsh` is automatically loaded by `.zshrc` with strict permissions (`0600`) and ignored by Git.
 
 ---
-
 
 ## Theme Management (`posh-theme`)
 
@@ -225,20 +253,25 @@ posh-theme catppuccin
 
 ---
 
-## Plugin Updates
+## Development, Testing & Verification
 
-To update all installed ZSH plugins from upstream repositories:
+Run the local test suite and static analysis tools:
 
 ```bash
-zplugin-update
+# Full verification (syntax, security lint, unit & integration tests)
+make verify
+
+# Run automated unit and integration tests (pure offline)
+make test
+
+# Run installer integration tests
+make test-installer
 ```
 
----
-
-## Verification and Testing
-
 For test scenarios and verification criteria, refer to:
-[TEST_SCENARIOS.md](./TEST_SCENARIOS.md)
+- [TEST_SCENARIOS.md](./TEST_SCENARIOS.md)
+- [SECURITY.md](./SECURITY.md)
+- [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
@@ -246,10 +279,10 @@ For test scenarios and verification criteria, refer to:
 
 This repository includes a multi-distribution CI matrix running on GitHub Actions:
 
-- **Debian / Ubuntu**: Tests against Ubuntu 24.04 LTS, Ubuntu 22.04 LTS, Debian 12 (Bookworm), and Debian Testing.
-- **Arch / Fedora / openSUSE**: Tests against Arch Linux, Fedora Latest, and openSUSE Leap 15.6.
-- **Enterprise / Alpine / Gentoo**: Tests against Rocky Linux 9, AlmaLinux 9, Alpine Linux 3.21/3.20.
-- **Static Analysis**: Validates syntax (`zsh -n`) and shell scripting standards (`shellcheck`).
+- **Debian / Ubuntu**: Tests against Ubuntu 24.04 LTS, Ubuntu 22.04 LTS, Debian 12 (Bookworm), and Debian 11.
+- **Arch / Fedora / openSUSE**: Tests against Arch Linux, Fedora, and openSUSE Leap.
+- **Enterprise / Alpine**: Tests against Rocky Linux 9, AlmaLinux 9, and Alpine Linux.
+- **Automated Test Suite**: Executes unit and integration test suites offline.
 
 ---
 

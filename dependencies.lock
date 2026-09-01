@@ -1,0 +1,13 @@
+# ZSH Dotfiles - Dependencies Lockfile
+# Format: name<TAB>version<TAB>os<TAB>arch<TAB>url<TAB>sha256
+yt-dlp	2025.02.19	linux	x86_64	https://github.com/yt-dlp/yt-dlp/releases/download/2025.02.19/yt-dlp_linux	a3e45133e1960a2ecc3c575b8470ab0d48a52bd92eb1ee3b4b82698fb9a2fc48
+yt-dlp	2025.02.19	linux	aarch64	https://github.com/yt-dlp/yt-dlp/releases/download/2025.02.19/yt-dlp	a18843c75b04756ed1d8e261b54de8b7ddf918f73134175d5acab745455dcbc8
+yt-dlp	2025.02.19	macos	all	https://github.com/yt-dlp/yt-dlp/releases/download/2025.02.19/yt-dlp_macos	fc92f4bc4b5bc4bb0406f47c52b1617e7d4b7e34ef4b6af992e80e338d5cda31
+oh-my-posh	v31.1.2	linux	x86_64	https://github.com/JanDeDobbeleer/oh-my-posh/releases/download/v31.1.2/posh-linux-amd64	f691e8913cf5abaf941a2f73da4e5df3ceb0d99e979451ae1734347b775d843e
+oh-my-posh	v31.1.2	linux	aarch64	https://github.com/JanDeDobbeleer/oh-my-posh/releases/download/v31.1.2/posh-linux-arm64	f89022231e1d031f46a5f8e6254bee1dd871c328432c4f9d3a05c823fe1d26a1
+oh-my-posh	v31.1.2	macos	x86_64	https://github.com/JanDeDobbeleer/oh-my-posh/releases/download/v31.1.2/posh-darwin-amd64	4b3448d87c2be71feb3b009d6a07267133a0d9694512f31756fae4193004c952
+oh-my-posh	v31.1.2	macos	aarch64	https://github.com/JanDeDobbeleer/oh-my-posh/releases/download/v31.1.2/posh-darwin-arm64	92fecaf338c6fb35190cbbe7df15a051c8caa5b031cf57753a6acfc10390721f
+atuin	v18.21.0	linux	x86_64	https://github.com/atuinsh/atuin/releases/download/v18.21.0/atuin-x86_64-unknown-linux-musl.tar.gz	792e1867d113ba9bebec94996b3160164aba738e3d23987b3cddb9dee976ac08
+atuin	v18.21.0	linux	aarch64	https://github.com/atuinsh/atuin/releases/download/v18.21.0/atuin-aarch64-unknown-linux-musl.tar.gz	9b8a76df370eba71ea0809d4df74f79351be2314c1ed90cae229499e69ca2ee1
+atuin	v18.21.0	macos	x86_64	https://github.com/atuinsh/atuin/releases/download/v18.21.0/atuin-x86_64-apple-darwin.tar.gz	74efd10b08bf21e5e9448e4b4c2fce9995c655928899b0375411d427bec3c347
+atuin	v18.21.0	macos	aarch64	https://github.com/atuinsh/atuin/releases/download/v18.21.0/atuin-aarch64-apple-darwin.tar.gz	c78ac159c89c38ee0b56eb6a11d9c0a7340de3a03b98fbbccd44f8e2d91e6e6e
