@@ -30,13 +30,13 @@ Technical verification suite for validating features and functionality of the ZS
 
 1. **Interactive Selection**:
    - Command: `posh-theme`
-   - Acceptance Criteria: FZF selection menu displays available local and popular official themes.
+   - Acceptance Criteria: FZF selection menu displays available local and popular official themes (150+ themes).
 2. **Direct Activation**:
-   - Command: `posh-theme catppuccin`
-   - Acceptance Criteria: Theme is downloaded from GitHub, stripped of layout-shifting transient prompts, and applied immediately.
+   - Command: `posh-theme if_tea`
+   - Acceptance Criteria: Theme is loaded from cache or downloaded, stripped of transient prompts, and applied immediately.
 3. **Persistence Verification**:
    - Command: `cat ~/.config/zsh/current_theme`
-   - Acceptance Criteria: File contains `catppuccin` and persists across new shell sessions.
+   - Acceptance Criteria: File contains `if_tea` and persists across new shell sessions.
 4. **Reset to Default**:
    - Command: `posh-theme clean-detailed`
 
@@ -100,14 +100,17 @@ Technical verification suite for validating features and functionality of the ZS
 ---
 
 ### Scenario 9: Universal Helpers (`take` and `extract`)
-*Objective: Verify helper functions.*
+*Objective: Verify single-file and batch multi-archive extraction.*
 
-1. Directory traversal:
+1. **Directory traversal (`take`)**:
    - Command: `take /tmp/test_dir/nested`
    - Acceptance Criteria: Directory hierarchy is created and current working directory switches to `/tmp/test_dir/nested`.
-2. Archive extraction:
-   - Command: `extract archive.tar.gz` or `extract archive.zip`
-   - Acceptance Criteria: Target archive is extracted using appropriate binary without flags.
+2. **Single Archive Extraction (`extract`)**:
+   - Command: `extract archive.tar.gz`
+   - Acceptance Criteria: Archive is extracted using appropriate binary without format-specific flags.
+3. **Batch Multi-Archive Extraction (e.g. Google Drive Split ZIPs)**:
+   - Command: `extract *.zip` or `extract part1.zip part2.zip part3.tar.gz`
+   - Acceptance Criteria: Iterates through all provided archives, extracts each in sequence, and outputs summary report: `[OK] Extracted N archive(s)`.
 
 ---
 
