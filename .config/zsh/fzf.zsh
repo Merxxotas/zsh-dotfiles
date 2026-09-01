@@ -45,7 +45,7 @@ _fzf_file_no_hidden() {
     cmd="find . -type f -not -path '*/.*'"
   fi
   result=$(eval "$cmd" | fzf --preview "$_FZF_PREVIEW_CMD") \
-    && LBUFFER+="$result"
+    && LBUFFER+="${(q)result}"
   zle reset-prompt
 }
 zle -N _fzf_file_no_hidden

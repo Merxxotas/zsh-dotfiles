@@ -90,8 +90,12 @@ elif command -v batcat >/dev/null 2>&1; then
   alias cat='batcat'
 fi
 
-alias grep='grep --color=auto'
-alias diff='diff --color=auto'
+if diff --color=auto /dev/null /dev/null >/dev/null 2>&1; then
+  alias diff='diff --color=auto'
+fi
+if grep --color=auto "" /dev/null >/dev/null 2>&1; then
+  alias grep='grep --color=auto'
+fi
 alias df='df -h'
 alias vim='nvim'
 

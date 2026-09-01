@@ -8,10 +8,10 @@ if ! infocmp "$TERM" >/dev/null 2>&1; then
 fi
 
 # XDG Base Directories
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_STATE_HOME="$HOME/.local/state"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
 # Default Editor
 export EDITOR="nvim"
@@ -24,28 +24,29 @@ elif command -v batcat >/dev/null 2>&1; then
   export MANPAGER="batcat -l man -p"
 fi
 
-# GPG TTY
-export GPG_TTY=$(tty)
+# GPG TTY (only in interactive terminal)
+if [ -t 0 ]; then
+  export GPG_TTY="$(tty 2>/dev/null)"
+fi
+
+# Deduplicate PATH entries automatically
+typeset -U path PATH
 
 # Consolidated Universal PATH
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.atuin/bin:$PATH"
+path=(
+  "$HOME/.local/bin"
+  "$HOME/.cargo/bin"
+  "$HOME/.atuin/bin"
+  $path
+)
 
 # Bun & PNPM
 export BUN_INSTALL="$HOME/.bun"
-[ -d "$BUN_INSTALL/bin" ] && export PATH="$BUN_INSTALL/bin:$PATH"
+[ -d "$BUN_INSTALL/bin" ] && path=("$BUN_INSTALL/bin" $path)
 
-export PNPM_HOME="$HOME/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME/bin:"*) ;;
-  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
-esac
+export PNPM_HOME="$XDG_DATA_HOME/pnpm"
+[ -d "$PNPM_HOME" ] && path=("$PNPM_HOME" $path)
 
 # Cargo environment
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
-
-# System and Application Variables
-export LIBVIRT_DEFAULT_URI="qemu:///system"
-export QML2_IMPORT_PATH="$HOME/.local/lib/qt6/qml"
-export CAELESTIA_LIB_DIR="$HOME/.local/lib/caelestia"
-export ENDCORD_VOICE_OPUS_MODE="audio"
 
