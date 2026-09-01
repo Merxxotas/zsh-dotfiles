@@ -17,7 +17,7 @@ help:
 lint:
 	@echo "==> Validating Bash scripts..."
 	@bash -n install.sh
-	@for f in tests/**/*.bash tests/*.sh; do [ -f "$$f" ] && bash -n "$$f"; done
+	@find tests -type f \( -name '*.bash' -o -name '*.sh' \) -exec bash -n {} +
 	@if command -v shellcheck >/dev/null 2>&1; then \
 		echo "==> Running ShellCheck..."; \
 		shellcheck -e SC1091,SC2086,SC2034 install.sh; \

@@ -72,12 +72,18 @@ zplugin-install() {
   while IFS=$'\t' read -r name repo commit entrypoint || [[ -n "$name" ]]; do
     [[ -z "$name" || "$name" =~ ^[[:space:]]*# ]] && continue
 
+    if [[ ! "$commit" =~ ^[0-9a-f]{40}$ ]]; then
+      echo "  [ERROR] Invalid commit SHA for $name: '$commit'" >&2
+      failed=$((failed + 1))
+      continue
+    fi
+
     local plugin_path="${ZPLUGINDIR}/${name}"
     echo "[INFO] Installing/verifying plugin '$name' (${commit:0:7})..."
 
     if [[ ! -d "$plugin_path" ]]; then
       if git clone --quiet "https://github.com/${repo}.git" "$plugin_path" 2>/dev/null; then
-        if git -C "$plugin_path" checkout --quiet "$commit" 2>/dev/null; then
+        if git -C "$plugin_path" checkout --detach --quiet -- "$commit" 2>/dev/null; then
           echo "  [OK] Installed $name at $commit"
           success=$((success + 1))
         else
@@ -99,7 +105,7 @@ zplugin-install() {
       else
         echo "  [INFO] Syncing $name to locked commit $commit..."
         git -C "$plugin_path" fetch --quiet origin 2>/dev/null || true
-        if git -C "$plugin_path" checkout --quiet "$commit" 2>/dev/null; then
+        if git -C "$plugin_path" checkout --detach --quiet -- "$commit" 2>/dev/null; then
           echo "  [OK] Checked out $commit"
           success=$((success + 1))
         else

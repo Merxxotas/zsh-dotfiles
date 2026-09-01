@@ -288,9 +288,7 @@ create_backup() {
       echo "zsh	symlink	$(readlink "$TARGET_ZDOTDIR")"
     elif [ "$zdotdir_status" = "directory" ]; then
       mkdir -p "$snap_dir/data/zsh"
-      cp -r "$TARGET_ZDOTDIR/"* "$snap_dir/data/zsh/" 2>/dev/null || true
-      [ -f "$TARGET_ZDOTDIR/.zshrc" ] && cp "$TARGET_ZDOTDIR/.zshrc" "$snap_dir/data/zsh/.zshrc"
-      [ -f "$TARGET_ZDOTDIR/.zshenv" ] && cp "$TARGET_ZDOTDIR/.zshenv" "$snap_dir/data/zsh/.zshenv"
+      cp -a "$TARGET_ZDOTDIR/." "$snap_dir/data/zsh/"
       echo "zsh	directory	-"
     fi
   } > "$snap_dir/manifest.tsv"
@@ -344,7 +342,13 @@ install_locked_dependency() {
     computed_sha="$(shasum -a 256 "$tmp_file" | awk '{print $1}')"
   fi
 
-  if [ -n "$computed_sha" ] && [ "$computed_sha" != "$matched_sha" ]; then
+  if [ -z "$computed_sha" ]; then
+    echo -e "  ${RED}[ERROR] Neither sha256sum nor shasum is available to verify $name!${NC}" >&2
+    rm -rf "$tmp_dir"
+    return 1
+  fi
+
+  if [ "$computed_sha" != "$matched_sha" ]; then
     echo -e "  ${RED}[ERROR] Checksum mismatch for $name! Expected $matched_sha, got $computed_sha${NC}" >&2
     rm -rf "$tmp_dir"
     return 1
@@ -353,11 +357,19 @@ install_locked_dependency() {
   # Handle tarball or raw binary
   mkdir -p "$TARGET_HOME/.local/bin"
   if [[ "$matched_url" == *.tar.gz ]]; then
-    tar -xzf "$tmp_file" -C "$tmp_dir" 2>/dev/null || true
+    if ! tar -xzf "$tmp_file" -C "$tmp_dir" 2>/dev/null; then
+      echo -e "  ${RED}[ERROR] Failed to extract tarball for $name${NC}" >&2
+      rm -rf "$tmp_dir"
+      return 1
+    fi
     if [ -f "$tmp_dir/$name" ]; then
       cp "$tmp_dir/$name" "$TARGET_HOME/.local/bin/$name"
     elif [ -f "$tmp_dir/bin/$name" ]; then
       cp "$tmp_dir/bin/$name" "$TARGET_HOME/.local/bin/$name"
+    else
+      echo -e "  ${RED}[ERROR] Extracted package did not contain binary $name${NC}" >&2
+      rm -rf "$tmp_dir"
+      return 1
     fi
   else
     cp "$tmp_file" "$TARGET_HOME/.local/bin/$name"
@@ -448,7 +460,7 @@ deploy_configuration() {
 
   # Migrate legacy directory symlink if present
   if [ -L "$TARGET_ZDOTDIR" ]; then
-    echo -e "  ${INFO}[INFO] Migrating legacy directory symlink to file-based model...${NC}"
+    echo -e "  ${BLUE}[INFO] Migrating legacy directory symlink to file-based model...${NC}"
     rm -f "$TARGET_ZDOTDIR"
     mkdir -p "$TARGET_ZDOTDIR/themes"
   fi
@@ -543,12 +555,23 @@ install_plugins() {
   mkdir -p "$TARGET_DATA_HOME/zsh/plugins"
   while IFS=$'\t' read -r name repo commit entrypoint; do
     [[ "$name" =~ ^#.*$ || -z "$name" ]] && continue
+    if [[ ! "$commit" =~ ^[0-9a-f]{40}$ ]]; then
+      echo -e "  ${RED}[ERROR] Invalid commit SHA for $name: '$commit'${NC}" >&2
+      continue
+    fi
+
     local pdir="$TARGET_DATA_HOME/zsh/plugins/$name"
     if [ ! -d "$pdir" ]; then
       echo -e "  [INFO] Cloning $name ($commit)..."
       if git clone --quiet "https://github.com/${repo}.git" "$pdir" 2>/dev/null; then
-        git -C "$pdir" checkout --quiet "$commit" 2>/dev/null || true
-        echo -e "  ${GREEN}[OK]${NC} $name installed at $commit"
+        if git -C "$pdir" checkout --detach --quiet -- "$commit" 2>/dev/null; then
+          echo -e "  ${GREEN}[OK]${NC} $name installed at $commit"
+        else
+          echo -e "  ${RED}[ERROR] Failed to checkout commit $commit for $name${NC}" >&2
+          rm -rf "$pdir"
+        fi
+      else
+        echo -e "  ${RED}[ERROR] Failed to clone $repo${NC}" >&2
       fi
     else
       echo -e "  ${GREEN}[OK]${NC} $name already present"
