@@ -1,0 +1,10 @@
+# ZSH Dotfiles - Plugins Lockfile
+# Format: name<TAB>repository<TAB>commit<TAB>entrypoint
+zsh-autosuggestions	zsh-users/zsh-autosuggestions	85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5	zsh-autosuggestions.zsh
+zsh-history-substring-search	zsh-users/zsh-history-substring-search	14c8d2e0ffaee98f2df9850b19944f32546fdea5	zsh-history-substring-search.zsh
+zsh-vi-mode	jeffreytse/zsh-vi-mode	91cafe4a09b6670cb8e761aa413e5f7b9e00816f	zsh-vi-mode.plugin.zsh
+zsh-autopair	hlissner/zsh-autopair	449a7c3d095bc8f3d78cf37b9549f8bb4c383f3d	autopair.zsh
+zsh-you-should-use	MichaelAquilina/zsh-you-should-use	5f3d129864ee4505043d88c3486224f1d75b692e	you-should-use.plugin.zsh
+zsh-abbr	olets/zsh-abbr	889f4772c12b9dbe4965bbd56f2572af0a28fa3b	zsh-abbr.zsh
+fzf-tab	Aloxaf/fzf-tab	24105b15714bfec37989ed5c5b6e60f572253019	fzf-tab.plugin.zsh
+fast-syntax-highlighting	zdharma-continuum/fast-syntax-highlighting	4672ad5dd9ad68a7effc1476d65afb7c584ce2b3	fast-syntax-highlighting.plugin.zsh
