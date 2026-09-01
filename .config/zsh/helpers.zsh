@@ -67,4 +67,7 @@ extract() {
   done
 
   echo "[OK] Extracted $success archive(s)."
+  if [ $failed -gt 0 ] || [ $success -eq 0 ]; then
+    return 1
+  fi
 }
