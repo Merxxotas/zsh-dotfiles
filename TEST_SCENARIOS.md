@@ -4,6 +4,27 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
+## Automated Test Suite Matrix
+
+Run all offline automated tests with:
+
+```bash
+make test
+```
+
+| ID | Suite | Target | Status | Coverage |
+| :--- | :--- | :--- | :---: | :--- |
+| **TS-01** | `test_installer.bash` | `install.sh` | **Automated** | Copy, symlink, transitions, backups, dry-run, unknown arguments |
+| **TS-02** | `test_media.bash` | `media.zsh` | **Automated** | `vdl` parser, strict quality bounds, error codes on missing inputs |
+| **TS-03** | `test_prompt.bash` | `prompt.zsh` | **Automated** | Theme sanitization, JSON security, XDG cache persistence |
+| **TS-04** | `test_env.bash` | `.zshenv` | **Automated** | XDG defaults preservation, PATH deduplication, GPG_TTY safety |
+| **TS-05** | `test_helpers.bash` | `helpers.zsh` | **Automated** | `take` argument validation, `extract` batch error codes |
+| **TS-06** | `test_plugins.bash` | `plugins.zsh` | **Automated** | Zero network during startup, `plugins.lock` integrity |
+
+---
+
+## Interactive & Visual Scenarios
+
 ### Scenario 1: FZF-Tab Interactive Completion Previews
 *Objective: Verify contextual preview rendering upon Tab trigger.*
 
@@ -25,34 +46,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 2: Universal Multimedia Suite (`media.zsh`)
-*Objective: Verify video conversion, universal downloading, audio extraction, trimming, and GIF creation.*
-
-1. **Universal Video Transcoding (`vconv`)**:
-   - Command: `vconv video.webm mp4` or batch `vconv *.webm mp4`
-   - Acceptance Criteria: Converts video with H.264/AAC at high visual quality (`crf 18`).
-2. **Fast Stream Copy (`vconv -f`)**:
-   - Command: `vconv -f video.mkv mp4`
-   - Acceptance Criteria: Instantly switches container format without re-rendering in under 1 second.
-3. **Universal Web Video Download (`vdl`)**:
-   - Command: `vdl "https://www.youtube.com/watch?v=..."` or `vdl "https://x.com/..."`
-   - Acceptance Criteria: Downloads video in MP4 container with concurrent fragments, embedded metadata, and thumbnail.
-4. **Universal Web Audio Download (`adl`)**:
-   - Command: `adl "https://www.youtube.com/watch?v=..."`
-   - Acceptance Criteria: Extracts 320kbps MP3 audio with embedded ID3 tags and album art.
-5. **Local Audio Extraction (`vaudio`)**:
-   - Command: `vaudio video.mp4`
-   - Acceptance Criteria: Extracts audio track into `video.mp3` with high quality VBR.
-6. **Lossless Video Trimming (`vcut`)**:
-   - Command: `vcut video.mp4 00:01:00 00:02:30 clip.mp4`
-   - Acceptance Criteria: Cuts video between timestamps without re-encoding.
-7. **High-Quality GIF Generator (`vgif`)**:
-   - Command: `vgif video.mp4 animation.gif 15 480`
-   - Acceptance Criteria: Uses 2-pass `palettegen` to generate clean, unpixelated GIF animation.
-
----
-
-### Scenario 3: Oh-My-Posh Theme Management (`posh-theme`)
+### Scenario 2: Oh-My-Posh Theme Management (`posh-theme`)
 *Objective: Verify dynamic theme switching, remote downloads, and persistence.*
 
 1. **Interactive Selection**:
@@ -62,14 +56,14 @@ Technical verification suite for validating features and functionality of the ZS
    - Command: `posh-theme if_tea`
    - Acceptance Criteria: Theme is loaded from cache or downloaded, stripped of transient prompts, and applied immediately.
 3. **Persistence Verification**:
-   - Command: `cat ~/.config/zsh/current_theme`
+   - Command: `cat $XDG_STATE_HOME/zsh/current_theme`
    - Acceptance Criteria: File contains `if_tea` and persists across new shell sessions.
 4. **Reset to Default**:
    - Command: `posh-theme clean-detailed`
 
 ---
 
-### Scenario 4: Real-Time Abbreviations (`zsh-abbr`)
+### Scenario 3: Real-Time Abbreviations (`zsh-abbr`)
 *Objective: Verify expansion behavior and explicit history persistence.*
 
 1. Type `gs` and press `Space` -> Expands to `git status -s`.
@@ -81,7 +75,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 5: Magic Sudo (`Alt+S`)
+### Scenario 4: Magic Sudo (`Alt+S`)
 *Objective: Validate prefixing and removing sudo dynamically.*
 
 1. Type: `pacman -Syu` or `apt update` (do not press Enter).
@@ -90,7 +84,7 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 6: Didactic Alias Reminder (`zsh-you-should-use`)
+### Scenario 5: Didactic Alias Reminder (`zsh-you-should-use`)
 *Objective: Verify suggestions when explicit long commands are typed.*
 
 1. Inside a Git repository, type: `git status -s` and press `Enter`.
@@ -98,59 +92,9 @@ Technical verification suite for validating features and functionality of the ZS
 
 ---
 
-### Scenario 7: Atuin History and TUI Exploration
-*Objective: Validate shell history retrieval and interactive search.*
+### Scenario 6: Vi-Mode Status Bar Integration
+*Objective: Verify real-time mode transitions and cursor indicators.*
 
-1. Press `Ctrl + R` or `Up Arrow`.
-2. Acceptance Criteria: Atuin interactive TUI opens, displaying execution history, duration, exit code, and timestamps.
-3. Press `Tab` inside Atuin to toggle filter modes (Global, Host, Directory, Session).
-
----
-
-### Scenario 8: Autopair Execution
-*Objective: Validate automatic matching and deletion of paired delimiters.*
-
-1. Type `"` -> Line buffer contains `""` with cursor positioned between quotes.
-2. Type internal text and type `"` again -> Cursor jumps over the closing quote.
-3. With cursor between empty delimiters `""` or `()`, press `Backspace` -> Both characters are removed.
-
----
-
-### Scenario 9: Vi-Mode and Cursor States
-*Objective: Validate modal editing and cursor geometry.*
-
-1. Type in command buffer -> Cursor is displayed as a vertical beam (`|`).
-2. Press `Esc` -> Cursor switches to solid block (`█`).
-3. Press `b`, `w`, `dd` to perform standard Vi movements/edits.
-4. Press `i` -> Cursor returns to vertical beam (`|`).
-
----
-
-### Scenario 10: Universal Helpers (`take` and `extract`)
-*Objective: Verify single-file and batch multi-archive extraction.*
-
-1. **Directory traversal (`take`)**:
-   - Command: `take /tmp/test_dir/nested`
-   - Acceptance Criteria: Directory hierarchy is created and current working directory switches to `/tmp/test_dir/nested`.
-2. **Single Archive Extraction (`extract`)**:
-   - Command: `extract archive.tar.gz`
-   - Acceptance Criteria: Archive is extracted using appropriate binary without format-specific flags.
-3. **Batch Multi-Archive Extraction (e.g. Google Drive Split ZIPs)**:
-   - Command: `extract *.zip` or `extract part1.zip part2.zip part3.tar.gz`
-   - Acceptance Criteria: Iterates through all provided archives, extracts each in sequence, and outputs summary report: `[OK] Extracted N archive(s)`.
-
----
-
-### Scenario 11: Fuzzy File Finders
-*Objective: Validate FZF integration.*
-
-1. Press `Ctrl + F` -> Launches file search excluding hidden files with bat preview.
-2. Press `Ctrl + T` -> Launches comprehensive file search with bat preview.
-
----
-
-### Scenario 12: Plugin Updates
-*Objective: Verify parallel Git plugin update mechanism.*
-
-1. Command: `zplugin-update`
-2. Acceptance Criteria: All Git repositories located in `~/.config/zsh/plugins/` are pulled using `--ff-only`.
+1. Open a new Zsh terminal.
+2. Press `Escape` -> Cursor shape transforms to Block / command mode.
+3. Press `i` or `a` -> Cursor shape transforms to Line / insert mode.
