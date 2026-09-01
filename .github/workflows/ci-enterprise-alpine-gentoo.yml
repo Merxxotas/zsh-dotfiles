@@ -39,3 +39,10 @@ jobs:
         run: |
           zsh -i -c "echo 'ZSH Initialized Successfully'"
           zsh -i -c "take /tmp/test_dir && echo 'Helper take OK'"
+
+      - name: Test Symlink mode installation
+        run: |
+          ./install.sh -y -s
+          test -L ~/.config/zsh
+          test -L ~/.zshenv
+          zsh -i -c "echo 'Symlink mode ZSH OK'"
