@@ -1,10 +1,13 @@
-name: CI - Enterprise, Alpine & Gentoo
+name: CI - Enterprise & Alpine Family
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -43,6 +46,7 @@ jobs:
       - name: Test Symlink mode installation
         run: |
           ./install.sh -y -s
-          test -L ~/.config/zsh
+          test -d ~/.config/zsh
+          test -L ~/.config/zsh/.zshrc
           test -L ~/.zshenv
           zsh -i -c "echo 'Symlink mode ZSH OK'"

@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Test on ${{ matrix.distro }}
@@ -43,11 +46,12 @@ jobs:
         run: |
           zsh -i -c "echo 'ZSH Initialized Successfully'"
           zsh -i -c "take /tmp/test_dir && echo 'Helper take OK'"
-          zsh -i -c "posh-theme clean-detailed && test -f ~/.config/zsh/current_theme && echo 'Posh theme OK'"
+          zsh -i -c "posh-theme clean-detailed && test -f ~/.local/state/zsh/current_theme && echo 'Posh theme OK'"
 
       - name: Test Symlink mode installation
         run: |
           ./install.sh -y -s
-          test -L ~/.config/zsh
+          test -d ~/.config/zsh
+          test -L ~/.config/zsh/.zshrc
           test -L ~/.zshenv
           zsh -i -c "echo 'Symlink mode ZSH OK'"
