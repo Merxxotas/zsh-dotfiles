@@ -177,6 +177,9 @@ vconv() {
   done
 
   echo "[INFO] Conversion complete: $success succeeded, $failed failed."
+  if [ $failed -gt 0 ] || [ $success -eq 0 ]; then
+    return 1
+  fi
 }
 
 # 2. vdl: Universal Video Downloader (YouTube, Twitter/X, TikTok, Instagram, Reddit, Twitch, Kick, Vimeo, etc.)
@@ -255,38 +258,36 @@ vdl() {
     custom_output="${user_custom_output}.%(ext)s"
   fi
 
-  # Build Intelligent Format Selector
-  local vcodec_filter=""
-  case "$preferred_codec" in
-    av1|av01)
-      vcodec_filter="[vcodec^=av01]"
-      ;;
-    h264|avc|avc1)
-      vcodec_filter="[vcodec^=avc|vcodec^=h264]"
-      ;;
-    vp9|vp09)
-      vcodec_filter="[vcodec^=vp09|vcodec^=vp9]"
-      ;;
-    hevc|h265|hev1|hvc1)
-      vcodec_filter="[vcodec^=hev|vcodec^=hvc|vcodec^=h265]"
-      ;;
-  esac
-
   local res_filter=""
   if [ -n "$max_res" ]; then
     res_filter="[height<=${max_res}]"
   fi
 
+  # Build Intelligent Format Selector
   local format_selector=""
-  if [ -n "$vcodec_filter" ] || [ -n "$res_filter" ]; then
-    format_selector="bv*${vcodec_filter}${res_filter}+ba/b${vcodec_filter}${res_filter}/bv*${res_filter}+ba/b"
-  else
-    if [ "$target_format" = "webm" ]; then
-      format_selector="bv*[ext=webm]+ba[ext=webm]/bv*+ba/b"
-    else
-      format_selector="bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b"
-    fi
-  fi
+  case "$preferred_codec" in
+    av1|av01)
+      format_selector="bv*[vcodec^=av01]${res_filter}+ba/b[vcodec^=av01]${res_filter}/bv*${res_filter}+ba/b"
+      ;;
+    h264|avc|avc1)
+      format_selector="bv*[vcodec^=avc]${res_filter}+ba/bv*[vcodec^=h264]${res_filter}+ba/b[vcodec^=avc]${res_filter}/b[vcodec^=h264]${res_filter}/bv*${res_filter}+ba/b"
+      ;;
+    vp9|vp09)
+      format_selector="bv*[vcodec^=vp09]${res_filter}+ba/bv*[vcodec^=vp9]${res_filter}+ba/b[vcodec^=vp09]${res_filter}/b[vcodec^=vp9]${res_filter}/bv*${res_filter}+ba/b"
+      ;;
+    hevc|h265|hev1|hvc1)
+      format_selector="bv*[vcodec^=hev]${res_filter}+ba/bv*[vcodec^=hvc]${res_filter}+ba/bv*[vcodec^=h265]${res_filter}+ba/b[vcodec^=hev]${res_filter}/b[vcodec^=hvc]${res_filter}/b[vcodec^=h265]${res_filter}/bv*${res_filter}+ba/b"
+      ;;
+    *)
+      if [ -n "$res_filter" ]; then
+        format_selector="bv*${res_filter}+ba/b${res_filter}/bv*+ba/b"
+      elif [ "$target_format" = "webm" ]; then
+        format_selector="bv*[ext=webm]+ba[ext=webm]/bv*+ba/b"
+      else
+        format_selector="bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/bv*+ba/b"
+      fi
+      ;;
+  esac
 
   local thumbnail_flag="--embed-thumbnail"
   if [ "$target_format" = "webm" ]; then
@@ -371,6 +372,7 @@ adl() {
 
   if [ $? -eq 0 ]; then
     echo "[OK] Audio download completed successfully."
+    return 0
   else
     echo "[ERROR] Audio download failed."
     return 1
@@ -395,9 +397,13 @@ vaudio() {
     return 1
   fi
 
+  local success=0
+  local failed=0
+
   for file in "$@"; do
     if [ ! -f "$file" ]; then
       echo "[ERROR] '$file' is not a valid file"
+      failed=$((failed + 1))
       continue
     fi
 
@@ -406,10 +412,16 @@ vaudio() {
     ffmpeg -hide_banner -loglevel warning -stats -i "$file" -vn -c:a libmp3lame -q:a 0 "$output"
     if [ $? -eq 0 ]; then
       echo "[OK] Audio extracted: '$output'"
+      success=$((success + 1))
     else
       echo "[ERROR] Failed to extract audio from '$file'"
+      failed=$((failed + 1))
     fi
   done
+
+  if [ $failed -gt 0 ] || [ $success -eq 0 ]; then
+    return 1
+  fi
 }
 
 # 5. vcut: Instant Lossless Video Trimmer (-c copy)
@@ -443,6 +455,7 @@ vcut() {
   ffmpeg -hide_banner -loglevel warning -stats -ss "$start" -to "$end" -i "$input" -c copy "$output"
   if [ $? -eq 0 ]; then
     echo "[OK] Trimmed video saved: '$output'"
+    return 0
   else
     echo "[ERROR] Failed to trim video."
     return 1
@@ -477,16 +490,26 @@ vgif() {
     return 1
   fi
 
-  local palette="/tmp/palette_$(date +%s%N).png"
+  local palette
+  palette="$(mktemp -t palette.XXXXXX.png 2>/dev/null || echo "/tmp/palette_$$.png")"
   echo "[INFO] Generating high-quality GIF from '$input' (${fps}fps, width ${width}px)..."
 
   ffmpeg -hide_banner -loglevel warning -i "$input" -vf "fps=${fps},scale=${width}:-1:flags=lanczos,palettegen" -update 1 -y "$palette"
+  local gen_status=$?
+  if [ $gen_status -ne 0 ]; then
+    rm -f "$palette"
+    echo "[ERROR] Failed to generate palette."
+    return 1
+  fi
+
   ffmpeg -hide_banner -loglevel warning -stats -i "$input" -i "$palette" -filter_complex "fps=${fps},scale=${width}:-1:flags=lanczos[x];[x][1:v]paletteuse" -y "$output"
+  local gif_status=$?
   
   rm -f "$palette"
 
-  if [ $? -eq 0 ]; then
+  if [ $gif_status -eq 0 ]; then
     echo "[OK] High quality GIF generated: '$output'"
+    return 0
   else
     echo "[ERROR] Failed to generate GIF."
     return 1
