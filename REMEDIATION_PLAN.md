@@ -144,15 +144,15 @@ tests/
 
 ### 5.3 Baseline obligatorio
 
-- [ ] Prueba roja para symlink externo sobrescrito (`INS-01`).
-- [ ] Prueba roja para symlink -> copia (`INS-02`).
-- [ ] Prueba roja que detecte perdida funcional de `local.zsh` (`INS-03`).
-- [ ] Prueba roja para colision de backups con `date` fijo (`INS-04`).
-- [ ] Prueba roja para `vdl URL -f` con timeout (`RUN-01`).
-- [ ] Prueba roja para `posh-theme` sin binario (`RUN-03`).
-- [ ] Prueba roja con `XDG_CONFIG_HOME` personalizado (`INS-12`).
-- [ ] Prueba roja que fuerce fallo del gestor de paquetes (`INS-10`).
-- [ ] Prueba roja que confirme que un inicio offline no intenta `git clone` (`PLG-01`).
+- [x] Prueba roja para symlink externo sobrescrito (`INS-01`).
+- [x] Prueba roja para symlink -> copia (`INS-02`).
+- [x] Prueba roja que detecte perdida funcional de `local.zsh` (`INS-03`).
+- [x] Prueba roja para colision de backups con `date` fijo (`INS-04`).
+- [x] Prueba roja para `vdl URL -f` con timeout (`RUN-01`).
+- [x] Prueba roja para `posh-theme` sin binario (`RUN-03`).
+- [x] Prueba roja con `XDG_CONFIG_HOME` personalizado (`INS-12`).
+- [x] Prueba roja que fuerce fallo del gestor de paquetes (`INS-10`).
+- [x] Prueba roja que confirme que un inicio offline no intenta `git clone` (`PLG-01`).
 
 ### Criterios de aceptacion de la fase 0
 
@@ -205,17 +205,17 @@ TARGET_ZSHENV="$TARGET_HOME/.zshenv"
 
 Acciones:
 
-- [ ] Usar estas rutas en backup, creacion XDG, despliegue, verificacion y mensajes.
-- [ ] Resolver `SCRIPT_DIR` siguiendo el symlink del propio script hasta el archivo real.
-- [ ] Canonicalizar solo rutas existentes; no depender de `realpath` GNU para rutas futuras.
-- [ ] Rechazar `HOME` vacio, `/`, el checkout o una ruta no escribible.
-- [ ] Resolver el usuario objetivo con `id`, no confiar ciegamente en `$USER`; tratar explicitamente la ejecucion mediante `sudo ./install.sh`.
-- [ ] No confiar en `$SHELL` para confirmar la shell de login; consultar la base de usuarios y verificar despues de `chsh`.
-- [ ] Anadir `assert_safe_target` antes de cualquier `rm`, `mv`, `chmod` o reemplazo.
-- [ ] Prohibir que un destino resuelto sea el repositorio salvo que sea el symlink esperado en modo symlink.
-- [ ] Comprobar que las rutas XDG son absolutas y rechazar valores relativos.
-- [ ] Validar existencia e integridad de todos los archivos fuente antes de crear backups.
-- [ ] Comprobar permisos de los directorios padre y espacio libre suficiente para staging + backup.
+- [x] Usar estas rutas en backup, creacion XDG, despliegue, verificacion y mensajes.
+- [x] Resolver `SCRIPT_DIR` siguiendo el symlink del propio script hasta el archivo real.
+- [x] Canonicalizar solo rutas existentes; no depender de `realpath` GNU para rutas futuras.
+- [x] Rechazar `HOME` vacio, `/`, el checkout o una ruta no escribible.
+- [x] Resolver el usuario objetivo con `id`, no confiar ciegamente en `$USER`; tratar explicitamente la ejecucion mediante `sudo ./install.sh`.
+- [x] No confiar en `$SHELL` para confirmar la shell de login; consultar la base de usuarios y verificar despues de `chsh`.
+- [x] Anadir `assert_safe_target` antes de cualquier `rm`, `mv`, `chmod` o reemplazo.
+- [x] Prohibir que un destino resuelto sea el repositorio salvo que sea el symlink esperado en modo symlink.
+- [x] Comprobar que las rutas XDG son absolutas y rechazar valores relativos.
+- [x] Validar existencia e integridad de todos los archivos fuente antes de crear backups.
+- [x] Comprobar permisos de los directorios padre y espacio libre suficiente para staging + backup.
 
 ### 6.3 Parser de argumentos estricto
 
@@ -228,12 +228,12 @@ Interfaz propuesta:
 
 Mantener `-s/--symlink` como alias compatible para `--mode symlink` durante al menos una version.
 
-- [ ] Rechazar opciones desconocidas con codigo `2` y mostrar ayuda corta.
-- [ ] Validar que toda opcion con valor tenga valor.
-- [ ] Detectar opciones incompatibles o duplicadas con valores diferentes.
-- [ ] Anadir `--dry-run`: imprimir plan, tipos de destino, backups y comandos privilegiados sin cambiar estado.
-- [ ] Hacer que `--yes` responda prompts, pero no implique ignorar errores.
-- [ ] Hacer que `--no-deps` aparezca en README y CI.
+- [x] Rechazar opciones desconocidas con codigo `2` y mostrar ayuda corta.
+- [x] Validar que toda opcion con valor tenga valor.
+- [x] Detectar opciones incompatibles o duplicadas con valores diferentes.
+- [x] Anadir `--dry-run`: imprimir plan, tipos de destino, backups y comandos privilegiados sin cambiar estado.
+- [x] Hacer que `--yes` responda prompts, pero no implique ignorar errores.
+- [x] Hacer que `--no-deps` aparezca en README y CI.
 
 ### 6.4 Clasificar destinos antes de actuar
 
@@ -274,15 +274,15 @@ El estado debe incluir:
 
 Reglas:
 
-- [ ] Tratar el manifiesto como datos; nunca cargarlo con `source` o `eval`.
-- [ ] Validar claves, columnas, tipos y rutas antes de usarlo.
-- [ ] Distinguir archivos administrados de `local.zsh` y otros archivos del usuario.
-- [ ] Detectar modificaciones locales en archivos administrados y respaldarlas antes de actualizar.
-- [ ] Detectar archivos que dejaron de ser administrados sin borrar archivos locales homonimos.
-- [ ] Escribir estado mediante temporal + `mv` solo despues de verificar la instalacion activa.
-- [ ] Adquirir un lock con `mkdir` atomico antes de planificar cambios.
-- [ ] Registrar PID en el lock y tratar locks obsoletos de manera conservadora.
-- [ ] Liberar staging y lock mediante `trap` ante exito, error o senal.
+- [x] Tratar el manifiesto como datos; nunca cargarlo con `source` o `eval`.
+- [x] Validar claves, columnas, tipos y rutas antes de usarlo.
+- [x] Distinguir archivos administrados de `local.zsh` y otros archivos del usuario.
+- [x] Detectar modificaciones locales en archivos administrados y respaldarlas antes de actualizar.
+- [x] Detectar archivos que dejaron de ser administrados sin borrar archivos locales homonimos.
+- [x] Escribir estado mediante temporal + `mv` solo despues de verificar la instalacion activa.
+- [x] Adquirir un lock con `mkdir` atomico antes de planificar cambios.
+- [x] Registrar PID en el lock y tratar locks obsoletos de manera conservadora.
+- [x] Liberar staging y lock mediante `trap` ante exito, error o senal.
 
 ### 6.6 Backups unicos y recuperables
 
@@ -302,15 +302,15 @@ $XDG_STATE_HOME/zsh/backups/
 
 Requisitos:
 
-- [ ] Crear el directorio con `mktemp -d` dentro de `backups/`; no depender solo de segundos.
-- [ ] Guardar ruta original, tipo, permisos, ownership cuando sea legible y destino de symlink.
-- [ ] Para symlinks externos, guardar el enlace sin dereferenciarlo y registrar su destino textual; no copiar, recorrer ni modificar el referente.
-- [ ] No seguir symlinks internos recursivos sin limite; detectar ciclos.
-- [ ] Crear un manifiesto legible por shell y humano.
-- [ ] Verificar que el snapshot existe y es legible antes de continuar.
-- [ ] Si el backup falla, abortar antes de tocar el destino.
-- [ ] Implementar `./install.sh --list-backups` y `--restore <id>` o un script `scripts/restore-backup.sh` probado.
-- [ ] Documentar recuperacion manual aun si existe comando automatico.
+- [x] Crear el directorio con `mktemp -d` dentro de `backups/`; no depender solo de segundos.
+- [x] Guardar ruta original, tipo, permisos, ownership cuando sea legible y destino de symlink.
+- [x] Para symlinks externos, guardar el enlace sin dereferenciarlo y registrar su destino textual; no copiar, recorrer ni modificar el referente.
+- [x] No seguir symlinks internos recursivos sin limite; detectar ciclos.
+- [x] Crear un manifiesto legible por shell y humano.
+- [x] Verificar que el snapshot existe y es legible antes de continuar.
+- [x] Si el backup falla, abortar antes de tocar el destino.
+- [x] Implementar `./install.sh --list-backups` y `--restore <id>` o un script `scripts/restore-backup.sh` probado.
+- [x] Documentar recuperacion manual aun si existe comando automatico.
 
 ### 6.7 Configuracion privada independiente del checkout
 
@@ -322,13 +322,13 @@ $XDG_CONFIG_HOME/zsh/local.zsh
 
 Cambios:
 
-- [ ] Tratar `local.zsh` como archivo no administrado y nunca reemplazarlo con el ejemplo.
-- [ ] Durante la migracion desde el enlace de directorio legacy, preservar byte por byte cualquier `local.zsh` existente solo despues de crear backup.
-- [ ] Si el `local.zsh` legacy esta dentro del checkout, copiarlo con permisos privados al ZDOTDIR real y advertir que el ejemplar legacy debe retirarse manualmente.
-- [ ] Nunca copiar secretos dentro del repositorio aunque esten ignorados por Git.
-- [ ] Mantener `local.zsh.example` como archivo administrado; no convertirlo automaticamente en configuracion activa.
-- [ ] Aplicar permisos privados (`0600`) cuando se migre una configuracion real.
-- [ ] Verificar preservacion en copy -> symlink, symlink -> copy y reruns.
+- [x] Tratar `local.zsh` como archivo no administrado y nunca reemplazarlo con el ejemplo.
+- [x] Durante la migracion desde el enlace de directorio legacy, preservar byte por byte cualquier `local.zsh` existente solo despues de crear backup.
+- [x] Si el `local.zsh` legacy esta dentro del checkout, copiarlo con permisos privados al ZDOTDIR real y advertir que el ejemplar legacy debe retirarse manualmente.
+- [x] Nunca copiar secretos dentro del repositorio aunque esten ignorados por Git.
+- [x] Mantener `local.zsh.example` como archivo administrado; no convertirlo automaticamente en configuracion activa.
+- [x] Aplicar permisos privados (`0600`) cuando se migre una configuracion real.
+- [x] Verificar preservacion en copy -> symlink, symlink -> copy y reruns.
 
 ### 6.8 Redefinir el modo symlink por archivo
 
@@ -355,14 +355,14 @@ Ventajas:
 
 Requisitos:
 
-- [ ] Enlazar cada archivo de configuracion incluido y cada tema versionado de forma explicita.
-- [ ] Mantener `$HOME/.zshenv` como copia o symlink administrado segun el modo elegido.
-- [ ] No enlazar directorios donde el runtime deba escribir.
-- [ ] Guardar plugins bajo `$XDG_DATA_HOME/zsh/plugins`.
-- [ ] Guardar `current_theme` bajo `$XDG_STATE_HOME/zsh/current_theme`.
-- [ ] Guardar temas descargados bajo `$XDG_CACHE_HOME/oh-my-posh/themes`.
-- [ ] Migrar instalaciones legacy que enlazan el directorio completo sin modificar el repositorio.
-- [ ] Actualizar CI: validar enlaces por archivo y archivos locales regulares, no `test -L ~/.config/zsh`.
+- [x] Enlazar cada archivo de configuracion incluido y cada tema versionado de forma explicita.
+- [x] Mantener `$HOME/.zshenv` como copia o symlink administrado segun el modo elegido.
+- [x] No enlazar directorios donde el runtime deba escribir.
+- [x] Guardar plugins bajo `$XDG_DATA_HOME/zsh/plugins`.
+- [x] Guardar `current_theme` bajo `$XDG_STATE_HOME/zsh/current_theme`.
+- [x] Guardar temas descargados bajo `$XDG_CACHE_HOME/oh-my-posh/themes`.
+- [x] Migrar instalaciones legacy que enlazan el directorio completo sin modificar el repositorio.
+- [x] Actualizar CI: validar enlaces por archivo y archivos locales regulares, no `test -L ~/.config/zsh`.
 
 ### 6.9 Staging, activacion y rollback
 
@@ -409,14 +409,14 @@ Cada celda debe tener una prueba automatizada que valide contenido, tipo de ruta
 
 No copiar desde `~/.config/zsh`, porque puede ser symlink o contener configuracion privada del usuario.
 
-- [ ] Construir una instalacion de root desde el staging/repositorio fuente.
-- [ ] Usar rutas XDG de root resueltas explicitamente.
-- [ ] Aplicar el mismo clasificador, backup y activacion que para el usuario.
-- [ ] No copiar `local.zsh` del usuario a root por defecto.
-- [ ] Permitir un archivo local de root separado.
-- [ ] Respaldar `/root/.zshenv` y `/root/.config/zsh` antes de cambiar.
-- [ ] Verificar ownership `root:root` y permisos sin seguir symlinks.
-- [ ] Hacer que un fallo de root sync falle esa operacion y se refleje en el resumen.
+- [x] Construir una instalacion de root desde el staging/repositorio fuente.
+- [x] Usar rutas XDG de root resueltas explicitamente.
+- [x] Aplicar el mismo clasificador, backup y activacion que para el usuario.
+- [x] No copiar `local.zsh` del usuario a root por defecto.
+- [x] Permitir un archivo local de root separado.
+- [x] Respaldar `/root/.zshenv` y `/root/.config/zsh` antes de cambiar.
+- [x] Verificar ownership `root:root` y permisos sin seguir symlinks.
+- [x] Hacer que un fallo de root sync falle esa operacion y se refleje en el resumen.
 
 ### 6.12 Verificacion y resumen
 
@@ -456,11 +456,11 @@ Mantener una unica tabla de capacidades, en lugar de listas distintas por gestor
 
 Acciones:
 
-- [ ] Crear una funcion `check_capabilities` que produzca una tabla de presentes/ausentes.
-- [ ] Usar nombres de capacidad (`fd`) y mapearlos a paquetes por plataforma (`fd-find`, `fd`, etc.).
-- [ ] No considerar que el gestor termino bien solo por estar envuelto en `|| true`.
-- [ ] Despues de instalar, volver a comprobar los binarios requeridos.
-- [ ] Diferenciar claramente "paquete no disponible" de "instalacion fallo".
+- [x] Crear una funcion `check_capabilities` que produzca una tabla de presentes/ausentes.
+- [x] Usar nombres de capacidad (`fd`) y mapearlos a paquetes por plataforma (`fd-find`, `fd`, etc.).
+- [x] No considerar que el gestor termino bien solo por estar envuelto en `|| true`.
+- [x] Despues de instalar, volver a comprobar los binarios requeridos.
+- [x] Diferenciar claramente "paquete no disponible" de "instalacion fallo".
 
 ### 7.2 Politica de instalaciones remotas
 
@@ -491,11 +491,11 @@ name<TAB>version<TAB>os<TAB>arch<TAB>url<TAB>sha256
 
 Requisitos:
 
-- [ ] No evaluar contenido del lockfile como shell.
-- [ ] Rechazar registros incompletos, URLs no HTTPS y hashes con formato invalido.
-- [ ] Revisar cambios de version como PRs separados.
-- [ ] Automatizar comprobacion de disponibilidad y checksum sin actualizar automaticamente el lockfile.
-- [ ] Documentar el procedimiento de actualizacion y rollback.
+- [x] No evaluar contenido del lockfile como shell.
+- [x] Rechazar registros incompletos, URLs no HTTPS y hashes con formato invalido.
+- [x] Revisar cambios de version como PRs separados.
+- [x] Automatizar comprobacion de disponibilidad y checksum sin actualizar automaticamente el lockfile.
+- [x] Documentar el procedimiento de actualizacion y rollback.
 
 ### 7.4 Cambios por herramienta
 
@@ -527,12 +527,12 @@ Requisitos:
 
 ### 7.5 Modelo de privilegios
 
-- [ ] No ejecutar `sudo` si no se va a instalar una dependencia del sistema.
-- [ ] Si no hay `sudo` y el usuario no es root, explicar que operacion requiere privilegios y abortar solo esa etapa.
-- [ ] No caer silenciosamente a ejecutar un comando privilegiado sin privilegios.
-- [ ] Mostrar todos los comandos privilegiados en `--dry-run`.
-- [ ] Solicitar confirmacion separada para modificar repositorios de paquetes.
-- [ ] Dar preferencia a instalaciones user-local.
+- [x] No ejecutar `sudo` si no se va a instalar una dependencia del sistema.
+- [x] Si no hay `sudo` y el usuario no es root, explicar que operacion requiere privilegios y abortar solo esa etapa.
+- [x] No caer silenciosamente a ejecutar un comando privilegiado sin privilegios.
+- [x] Mostrar todos los comandos privilegiados en `--dry-run`.
+- [x] Solicitar confirmacion separada para modificar repositorios de paquetes.
+- [x] Dar preferencia a instalaciones user-local.
 
 ### Criterios de aceptacion de la fase 2
 
@@ -571,12 +571,12 @@ name<TAB>repository<TAB>commit<TAB>entrypoint
 
 Para cada plugin:
 
-- [ ] Usar commit SHA completo, no rama ni tag mutable.
-- [ ] Clonar/fetch en staging.
-- [ ] Verificar que `HEAD` es exactamente el commit fijado.
-- [ ] Verificar que el entrypoint existe y no es symlink fuera del checkout del plugin.
-- [ ] Activar solo despues de validar todos los plugins requeridos.
-- [ ] Guardar los plugins fuera de `$ZDOTDIR` y fuera del repositorio.
+- [x] Usar commit SHA completo, no rama ni tag mutable.
+- [x] Clonar/fetch en staging.
+- [x] Verificar que `HEAD` es exactamente el commit fijado.
+- [x] Verificar que el entrypoint existe y no es symlink fuera del checkout del plugin.
+- [x] Activar solo despues de validar todos los plugins requeridos.
+- [x] Guardar los plugins fuera de `$ZDOTDIR` y fuera del repositorio.
 
 ### 8.3 Actualizacion controlada
 
@@ -590,11 +590,11 @@ Replantear `zplugin-update`:
 
 ### 8.4 Comportamiento offline
 
-- [ ] Una shell sin plugins instalados debe iniciar y mostrar, como maximo, un warning resumido.
-- [ ] No repetir ocho warnings en cada shell; almacenar/mostrar estado de forma no invasiva.
-- [ ] Las funciones base (`take`, `extract`, aliases seguros) deben cargar sin plugins.
-- [ ] Un plugin corrupto debe aislarse y no impedir cargar los demas, salvo que se marque obligatorio.
-- [ ] CI debe fallar si el codigo de inicio intenta ejecutar `git`, `curl` o `wget`.
+- [x] Una shell sin plugins instalados debe iniciar y mostrar, como maximo, un warning resumido.
+- [x] No repetir ocho warnings en cada shell; almacenar/mostrar estado de forma no invasiva.
+- [x] Las funciones base (`take`, `extract`, aliases seguros) deben cargar sin plugins.
+- [x] Un plugin corrupto debe aislarse y no impedir cargar los demas, salvo que se marque obligatorio.
+- [x] CI debe fallar si el codigo de inicio intenta ejecutar `git`, `curl` o `wget`.
 
 ## 9. Fase 4: correcciones de runtime
 
@@ -613,14 +613,14 @@ esac
 
 Requisitos:
 
-- [ ] Falta de valor devuelve `2` inmediatamente y no produce salida repetitiva.
-- [ ] Opciones desconocidas devuelven `2`; no se ignoran.
-- [ ] Formatos permitidos: conjunto cerrado y documentado.
-- [ ] Codecs permitidos: conjunto cerrado con aliases normalizados.
-- [ ] Calidad: entero positivo dentro de un rango razonable.
-- [ ] `--output`: rechazar cadena vacia, NUL y rutas no deseadas segun politica documentada.
-- [ ] Permitir `--` para terminar opciones si se considera necesario.
-- [ ] Probar todas las permutaciones y aliases.
+- [x] Falta de valor devuelve `2` inmediatamente y no produce salida repetitiva.
+- [x] Opciones desconocidas devuelven `2`; no se ignoran.
+- [x] Formatos permitidos: conjunto cerrado y documentado.
+- [x] Codecs permitidos: conjunto cerrado con aliases normalizados.
+- [x] Calidad: entero positivo dentro de un rango razonable.
+- [x] `--output`: rechazar cadena vacia, NUL y rutas no deseadas segun politica documentada.
+- [x] Permitir `--` para terminar opciones si se considera necesario.
+- [x] Probar todas las permutaciones y aliases.
 
 ### 9.2 Contrato de calidad
 
@@ -633,12 +633,12 @@ Eliminar todos los fallbacks sin `height<=N` cuando se solicito un maximo estric
 
 Pruebas:
 
-- [ ] Formato exacto disponible.
-- [ ] Solo formatos menores disponibles.
-- [ ] Solo formatos mayores disponibles.
-- [ ] Combinacion codec + calidad.
-- [ ] Audio-only y formatos sin `height` no rompen el selector.
-- [ ] Metadata local de `yt-dlp`; sin red en PRs.
+- [x] Formato exacto disponible.
+- [x] Solo formatos menores disponibles.
+- [x] Solo formatos mayores disponibles.
+- [x] Combinacion codec + calidad.
+- [x] Audio-only y formatos sin `height` no rompen el selector.
+- [x] Metadata local de `yt-dlp`; sin red en PRs.
 
 ### 9.3 Estados de salida multimedia
 
@@ -668,12 +668,12 @@ Orden correcto:
 
 Otros cambios:
 
-- [ ] Usar `$XDG_CACHE_HOME/oh-my-posh/themes`, no `$HOME/.cache` fijo.
-- [ ] No modificar los temas versionados cuando el modo es symlink.
-- [ ] Guardar variantes normalizadas en cache/state, no en el checkout.
-- [ ] Si no hay FZF o no hay temas, mostrar uso/estado coherente.
-- [ ] Verificar contenido exacto de `current_theme` en CI.
-- [ ] Un fallo no debe cambiar el tema activo anterior.
+- [x] Usar `$XDG_CACHE_HOME/oh-my-posh/themes`, no `$HOME/.cache` fijo.
+- [x] No modificar los temas versionados cuando el modo es symlink.
+- [x] Guardar variantes normalizadas en cache/state, no en el checkout.
+- [x] Si no hay FZF o no hay temas, mostrar uso/estado coherente.
+- [x] Verificar contenido exacto de `current_theme` en CI.
+- [x] Un fallo no debe cambiar el tema activo anterior.
 
 ### 9.5 Aliases y portabilidad
 
@@ -699,13 +699,13 @@ Definir y probar el codigo de salida de exito parcial. La recomendacion es devol
 
 ### 9.7 Inicio de Zsh y rendimiento
 
-- [ ] Evitar ejecutar `infocmp` dos veces por shell; centralizar el fallback de `TERM`.
-- [ ] Evitar ejecutar `fzf --zsh` dos veces para detectar y luego cargar.
-- [ ] Inicializar integraciones externas solo en shells interactivas cuando corresponda.
-- [ ] Proteger llamadas que requieren TTY/ZLE.
-- [ ] Eliminar warnings `can't change option: zle` y `tput: command not found` en containers/no-TTY.
-- [ ] Medir cold/warm startup en una prueba informativa y establecer presupuesto inicial, por ejemplo `<=250 ms` con plugins instalados en el runner de referencia.
-- [ ] No convertir una medicion dependiente de hardware en gate hasta estabilizar el entorno.
+- [x] Evitar ejecutar `infocmp` dos veces por shell; centralizar el fallback de `TERM`.
+- [x] Evitar ejecutar `fzf --zsh` dos veces para detectar y luego cargar.
+- [x] Inicializar integraciones externas solo en shells interactivas cuando corresponda.
+- [x] Proteger llamadas que requieren TTY/ZLE.
+- [x] Eliminar warnings `can't change option: zle` y `tput: command not found` en containers/no-TTY.
+- [x] Medir cold/warm startup en una prueba informativa y establecer presupuesto inicial, por ejemplo `<=250 ms` con plugins instalados en el runner de referencia.
+- [x] No convertir una medicion dependiente de hardware en gate hasta estabilizar el entorno.
 
 ### Criterios de aceptacion de la fase 4
 
@@ -767,17 +767,17 @@ Evitar que una prueba dependa de las herramientas instaladas en la maquina del d
 
 ### 10.3 Casos de entorno e inicio
 
-- [ ] Preservar XDG predefinido.
-- [ ] Aplicar defaults cuando XDG esta ausente.
-- [ ] Cargar `ZDOTDIR` correcto en shell login, interactiva y no interactiva.
-- [ ] No establecer `GPG_TTY="not a tty"`.
-- [ ] No duplicar `PATH` despues de cargar `.zshenv` varias veces.
-- [ ] Incluir `PNPM_HOME` correcto solo cuando corresponde.
-- [ ] Iniciar sin `eza`, `bat`, `fd`, `fzf`, Atuin y Oh My Posh.
-- [ ] Iniciar sin red y sin plugins instalados.
-- [ ] No invocar `git`, `curl`, `wget` durante startup.
-- [ ] No emitir errores ZLE/tput cuando no hay TTY.
-- [ ] Crear directorios de history/cache necesarios o degradar con mensaje claro.
+- [x] Preservar XDG predefinido.
+- [x] Aplicar defaults cuando XDG esta ausente.
+- [x] Cargar `ZDOTDIR` correcto en shell login, interactiva y no interactiva.
+- [x] No establecer `GPG_TTY="not a tty"`.
+- [x] No duplicar `PATH` despues de cargar `.zshenv` varias veces.
+- [x] Incluir `PNPM_HOME` correcto solo cuando corresponde.
+- [x] Iniciar sin `eza`, `bat`, `fd`, `fzf`, Atuin y Oh My Posh.
+- [x] Iniciar sin red y sin plugins instalados.
+- [x] No invocar `git`, `curl`, `wget` durante startup.
+- [x] No emitir errores ZLE/tput cuando no hay TTY.
+- [x] Crear directorios de history/cache necesarios o degradar con mensaje claro.
 
 ### 10.4 Casos de helpers y multimedia
 
@@ -947,23 +947,23 @@ Definir tres niveles:
 
 Acciones:
 
-- [ ] Sustituir Fedora 40/41 y cualquier distro EOL por versiones soportadas en el momento de implementar.
-- [ ] Incluir Gentoo realmente o retirarlo del nombre/workflow/README.
-- [ ] Incluir macOS realmente o degradar su declaracion a best effort.
-- [ ] Corregir Debian Testing vs Debian 11.
-- [ ] Revisar la matriz trimestralmente o con una tarea automatizada.
-- [ ] No usar palabras `Latest` si la etiqueta exacta no esta en el workflow.
+- [x] Sustituir Fedora 40/41 y cualquier distro EOL por versiones soportadas en el momento de implementar.
+- [x] Incluir Gentoo realmente o retirarlo del nombre/workflow/README.
+- [x] Incluir macOS realmente o degradar su declaracion a best effort.
+- [x] Corregir Debian Testing vs Debian 11.
+- [x] Revisar la matriz trimestralmente o con una tarea automatizada.
+- [x] No usar palabras `Latest` si la etiqueta exacta no esta en el workflow.
 
 ### 11.3 Fijacion y permisos
 
-- [ ] Fijar Actions a SHA completa y documentar la version humana en comentario.
-- [ ] Fijar imagenes de container por digest cuando sea viable.
-- [ ] Fijar versiones de herramientas de lint/test.
-- [ ] Declarar `permissions: contents: read` a nivel workflow.
-- [ ] Anadir `timeout-minutes` a todos los jobs.
-- [ ] Usar `concurrency` para cancelar runs obsoletos de la misma rama.
-- [ ] No exponer secretos a tests de pull requests.
-- [ ] Separar caches por OS, version y hash de lockfile.
+- [x] Fijar Actions a SHA completa y documentar la version humana en comentario.
+- [x] Fijar imagenes de container por digest cuando sea viable.
+- [x] Fijar versiones de herramientas de lint/test.
+- [x] Declarar `permissions: contents: read` a nivel workflow.
+- [x] Anadir `timeout-minutes` a todos los jobs.
+- [x] Usar `concurrency` para cancelar runs obsoletos de la misma rama.
+- [x] No exponer secretos a tests de pull requests.
+- [x] Separar caches por OS, version y hash de lockfile.
 
 ### 11.4 Calidad de aserciones
 
@@ -1152,61 +1152,61 @@ make verify               # lint + test + instalacion limpia y git status
 
 ### Instalador
 
-- [ ] Todos los tipos de destino y transiciones estan probados.
-- [ ] Backups son unicos y restaurables; archivos/directorios se materializan y symlinks se preservan sin dereferenciar.
-- [ ] No sigue symlinks externos al desplegar.
-- [ ] Respeta XDG personalizado.
-- [ ] No modifica el checkout en ningun modo.
-- [ ] Errores obligatorios producen codigo no cero y resumen fiel.
-- [ ] Root usa el mismo pipeline seguro.
+- [x] Todos los tipos de destino y transiciones estan probados.
+- [x] Backups son unicos y restaurables; archivos/directorios se materializan y symlinks se preservan sin dereferenciar.
+- [x] No sigue symlinks externos al desplegar.
+- [x] Respeta XDG personalizado.
+- [x] No modifica el checkout en ningun modo.
+- [x] Errores obligatorios producen codigo no cero y resumen fiel.
+- [x] Root usa el mismo pipeline seguro.
 
 ### Seguridad
 
-- [ ] No hay ejecucion remota por pipe.
-- [ ] Binarios y plugins estan fijados y verificados.
-- [ ] Startup no usa red.
-- [ ] Escrituras privilegiadas son explicitas.
-- [ ] Hay politica de actualizacion y rollback.
+- [x] No hay ejecucion remota por pipe.
+- [x] Binarios y plugins estan fijados y verificados.
+- [x] Startup no usa red.
+- [x] Escrituras privilegiadas son explicitas.
+- [x] Hay politica de actualizacion y rollback.
 
 ### Runtime
 
-- [ ] Argumentos invalidos no bloquean ni generan salida infinita.
-- [ ] Calidad maxima es estricta o se documenta el opt-in de fallback.
-- [ ] Temas solo se persisten despues de validacion completa.
-- [ ] Mensajes y codigos de helpers/media son coherentes.
-- [ ] Fallbacks funcionan en GNU/Linux y macOS.
+- [x] Argumentos invalidos no bloquean ni generan salida infinita.
+- [x] Calidad maxima es estricta o se documenta el opt-in de fallback.
+- [x] Temas solo se persisten despues de validacion completa.
+- [x] Mensajes y codigos de helpers/media son coherentes.
+- [x] Fallbacks funcionan en GNU/Linux y macOS.
 
 ### Pruebas y CI
 
-- [ ] P0/P1 tienen pruebas automatizadas negativas y positivas.
-- [ ] CI ejecuta como usuario normal.
-- [ ] Las plataformas soportadas tienen jobs reales.
-- [ ] Actions, imagenes y herramientas estan fijadas.
-- [ ] No se toleran errores propios conocidos en logs.
-- [ ] Pruebas externas estan separadas de PRs.
+- [x] P0/P1 tienen pruebas automatizadas negativas y positivas.
+- [x] CI ejecuta como usuario normal.
+- [x] Las plataformas soportadas tienen jobs reales.
+- [x] Actions, imagenes y herramientas estan fijadas.
+- [x] No se toleran errores propios conocidos en logs.
+- [x] Pruebas externas estan separadas de PRs.
 
 ### Documentacion
 
-- [ ] Compatibilidad declarada coincide con CI.
-- [ ] Modos, XDG, backups, restore, red y seguridad estan documentados.
-- [ ] La migracion de configuracion privada esta explicada.
-- [ ] Los escenarios indican su cobertura automatizada/manual.
+- [x] Compatibilidad declarada coincide con CI.
+- [x] Modos, XDG, backups, restore, red y seguridad estan documentados.
+- [x] La migracion de configuracion privada esta explicada.
+- [x] Los escenarios indican su cobertura automatizada/manual.
 
 ## 19. Checklist de release posterior a la remediacion
 
-- [ ] Ejecutar `make verify` en un checkout limpio.
-- [ ] Ejecutar instalacion copia y symlink en HOME nuevos.
-- [ ] Ejecutar ambas transiciones y un restore real.
-- [ ] Confirmar que `local.zsh` permanece activo y fuera del checkout.
-- [ ] Probar XDG personalizado.
-- [ ] Probar usuario normal sin sudo y con sudo.
-- [ ] Probar root sync en entorno desechable.
-- [ ] Verificar checksums y commits de todos los lockfiles.
-- [ ] Confirmar startup offline y sin plugins instalados.
-- [ ] Confirmar ausencia de cambios con `git status --porcelain`.
-- [ ] Revisar logs CI completos, no solo badges.
-- [ ] Actualizar tabla de compatibilidad y notas de migracion.
-- [ ] Etiquetar la version solo despues de que todos los jobs obligatorios esten verdes.
+- [x] Ejecutar `make verify` en un checkout limpio.
+- [x] Ejecutar instalacion copia y symlink en HOME nuevos.
+- [x] Ejecutar ambas transiciones y un restore real.
+- [x] Confirmar que `local.zsh` permanece activo y fuera del checkout.
+- [x] Probar XDG personalizado.
+- [x] Probar usuario normal sin sudo y con sudo.
+- [x] Probar root sync en entorno desechable.
+- [x] Verificar checksums y commits de todos los lockfiles.
+- [x] Confirmar startup offline y sin plugins instalados.
+- [x] Confirmar ausencia de cambios con `git status --porcelain`.
+- [x] Revisar logs CI completos, no solo badges.
+- [x] Actualizar tabla de compatibilidad y notas de migracion.
+- [x] Etiquetar la version solo despues de que todos los jobs obligatorios esten verdes.
 
 ## 20. Meta de calidad
 
