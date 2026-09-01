@@ -31,20 +31,26 @@ run_sudo() {
 
 # --- Argument Parsing ---
 UNATTENDED=false
+USE_SYMLINK=false
 for arg in "$@"; do
   case "$arg" in
     -y|--yes|--unattended|--non-interactive)
       UNATTENDED=true
       ;;
+    -s|--symlink)
+      USE_SYMLINK=true
+      ;;
     -h|--help)
       echo "Usage: ./install.sh [OPTIONS]"
       echo "Options:"
       echo "  -y, --yes, --unattended   Execute in non-interactive mode without prompts"
+      echo "  -s, --symlink             Link dotfiles directly to repository via symlinks"
       echo "  -h, --help                Show this help message"
       exit 0
       ;;
   esac
 done
+
 
 echo -e "${CYAN}${BOLD}"
 echo "================================================================"
@@ -179,14 +185,40 @@ mkdir -p "$HOME/.config/zsh/themes" "$HOME/.local/state/zsh" "$HOME/.cache/zsh" 
 echo -e "  ${GREEN}[OK]${NC} Base directories initialized."
 
 # --- 4. Deploy Configuration Files ---
-echo -e "\n${BLUE}${BOLD}[INFO] Deploying configuration modules to ~/.config/zsh/...${NC}"
-cp -r "$SCRIPT_DIR/.config/zsh/"* "$HOME/.config/zsh/"
-cp "$SCRIPT_DIR/.config/zsh/.zshenv" "$HOME/.config/zsh/.zshenv"
-cp "$SCRIPT_DIR/.config/zsh/.zshrc" "$HOME/.config/zsh/.zshrc"
-cp "$SCRIPT_DIR/.zshenv" "$HOME/.zshenv"
+echo -e "\n${BLUE}${BOLD}[INFO] Deploying configuration modules...${NC}"
+
+# Backup existing configurations if present and not already symlinked to this repo
+backup_timestamp="$(date +%Y%m%d_%H%M%S)"
+if [[ -d "$HOME/.config/zsh" && ! -L "$HOME/.config/zsh" && ! "$HOME/.config/zsh" -ef "$SCRIPT_DIR/.config/zsh" ]]; then
+  echo -e "  ${YELLOW}[BACKUP]${NC} Backing up existing ~/.config/zsh to ~/.config/zsh.bak.${backup_timestamp}..."
+  cp -r "$HOME/.config/zsh" "$HOME/.config/zsh.bak.${backup_timestamp}"
+fi
+
+if [[ -f "$HOME/.zshenv" && ! -L "$HOME/.zshenv" && ! "$HOME/.zshenv" -ef "$SCRIPT_DIR/.zshenv" ]]; then
+  echo -e "  ${YELLOW}[BACKUP]${NC} Backing up existing ~/.zshenv to ~/.zshenv.bak.${backup_timestamp}..."
+  cp "$HOME/.zshenv" "$HOME/.zshenv.bak.${backup_timestamp}"
+fi
+
+if [[ "$USE_SYMLINK" == "true" ]]; then
+  echo -e "  ${BLUE}[INFO]${NC} Creating symbolic links to repository..."
+  rm -rf "$HOME/.config/zsh"
+  ln -sf "$SCRIPT_DIR/.config/zsh" "$HOME/.config/zsh"
+  ln -sf "$SCRIPT_DIR/.zshenv" "$HOME/.zshenv"
+else
+  mkdir -p "$HOME/.config/zsh/themes"
+  cp -r "$SCRIPT_DIR/.config/zsh/"* "$HOME/.config/zsh/"
+  cp "$SCRIPT_DIR/.config/zsh/.zshenv" "$HOME/.config/zsh/.zshenv"
+  cp "$SCRIPT_DIR/.config/zsh/.zshrc" "$HOME/.config/zsh/.zshrc"
+  cp "$SCRIPT_DIR/.zshenv" "$HOME/.zshenv"
+fi
+
+if [[ ! -f "$HOME/.config/zsh/local.zsh" && -f "$SCRIPT_DIR/.config/zsh/local.zsh.example" ]]; then
+  cp "$SCRIPT_DIR/.config/zsh/local.zsh.example" "$HOME/.config/zsh/local.zsh.example"
+fi
 
 chmod -R go-w "$HOME/.config/zsh" 2>/dev/null || true
 echo -e "  ${GREEN}[OK]${NC} Modules, themes and helpers deployed successfully."
+
 
 # --- 5. Root Configuration (Optional) ---
 sync_root="n"
