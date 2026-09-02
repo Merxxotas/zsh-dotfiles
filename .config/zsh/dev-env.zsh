@@ -42,7 +42,7 @@ fi
 
 # Pay Respects (CLI Auto-Correction, replacing thefuck)
 if command -v pay-respects >/dev/null 2>&1; then
-  eval "$(pay-respects zsh --alias fuck)"
+  eval "$(pay-respects zsh --alias fuck --nocnf)"
 elif command -v thefuck >/dev/null 2>&1; then
   eval "$(thefuck --alias)"
 fi
