@@ -130,7 +130,7 @@ alias -- -='cd -'
 alias weather='curl wttr.in'
 alias weather1='weathr'
 alias speedtest='cloudflare-speed-cli'
-alias spotify_player='KITTY_WINDOW_ID=1 TERM=xterm-kitty spotify_player'
+alias spotify_player='KITTY_WINDOW_ID=1 spotify_player'
 
 # --- Formatted Git Log ---
 alias glog='PAGER="less -F -X" git log'
