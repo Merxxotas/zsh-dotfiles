@@ -40,8 +40,10 @@ if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
 fi
 
-# The Fuck (CLI Auto-Correction)
-if command -v thefuck >/dev/null 2>&1; then
+# Pay Respects (CLI Auto-Correction, replacing thefuck)
+if command -v pay-respects >/dev/null 2>&1; then
+  eval "$(pay-respects zsh --alias fuck)"
+elif command -v thefuck >/dev/null 2>&1; then
   eval "$(thefuck --alias)"
 fi
 
