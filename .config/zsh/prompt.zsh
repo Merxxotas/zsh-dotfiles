@@ -5,34 +5,18 @@
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 FUNCNEST=100
 
-if [[ $EUID -eq 0 ]]; then
-  THEME_DIR="${ZDOTDIR:-/root/.config/zsh}/themes"
-  CACHE_THEME_DIR="/root/.cache/oh-my-posh/themes"
-  STATE_DIR="/root/.local/state/zsh"
-  STATE_THEME_FILE="$STATE_DIR/current_theme"
-else
-  THEME_DIR="${ZDOTDIR:-$HOME/.config/zsh}/themes"
-  CACHE_THEME_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-posh/themes"
-  STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/zsh"
-  STATE_THEME_FILE="$STATE_DIR/current_theme"
-fi
+THEME_DIR="${ZDOTDIR:-$HOME/.config/zsh}/themes"
+CACHE_THEME_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-posh/themes"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/zsh"
+STATE_THEME_FILE="$STATE_DIR/current_theme"
 
 mkdir -p "$THEME_DIR" "$CACHE_THEME_DIR" "$STATE_DIR" 2>/dev/null || true
 
 _get_current_posh_theme() {
-  if [[ $EUID -eq 0 ]]; then
-    if [[ -f "$STATE_THEME_FILE" ]]; then
-      cat "$STATE_THEME_FILE"
-    elif [[ -f "/root/.config/zsh/current_theme" ]]; then
-      cat "/root/.config/zsh/current_theme"
-    else
-      echo "tokyo"
-    fi
-    return
-  fi
-
   if [[ -f "$STATE_THEME_FILE" ]]; then
     cat "$STATE_THEME_FILE"
+  elif [[ $EUID -eq 0 ]]; then
+    echo "tokyo"
   elif [[ -f "${ZDOTDIR:-$HOME/.config/zsh}/current_theme" ]]; then
     cat "${ZDOTDIR:-$HOME/.config/zsh}/current_theme"
   else
