@@ -26,12 +26,15 @@ jobs:
     steps:
       - name: Install bootstrap dependencies
         run: |
-          if [ -f /etc/debian_version ] && grep -q '^11\.' /etc/debian_version; then
+          if [ -f /etc/debian_version ] && grep -q '^11' /etc/debian_version; then
             sed -i '/bullseye-security/d' /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null || true
             echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+            apt-get update -y
+            apt-get install -y --allow-downgrades perl-base
+          else
+            apt-get update -y
           fi
-          apt-get update -y
-          apt-get install -y sudo curl git zsh ca-certificates
+          apt-get install -y --allow-downgrades sudo curl git zsh ca-certificates
 
       - name: Checkout repository
         uses: actions/checkout@v4
