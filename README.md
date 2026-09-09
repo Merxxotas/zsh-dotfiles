@@ -27,6 +27,9 @@ A high-performance, modular, and minimalist ZSH configuration suite. Designed fo
   - `vcut`: Instant lossless video trimming (`-c copy`) without re-encoding.
   - `vgif`: High-quality 2-pass animated GIF generator with optimized color palettes (`palettegen`).
 - **Fish-Style Real-Time Abbreviations (`zsh-abbr`)**: Expands abbreviations upon pressing `Space`, keeping the command line explicit and recording complete commands in shell history.
+- **CLI Command Correction (`pay-respects`)**: Ultra-fast Rust-based auto-correction (replacing `thefuck`), mapped to `fuck` with `--nocnf` for interference-free completion.
+- **IntelliShell Integration**: Contextual bookmarking and AI-assisted shell navigation (`intelli-shell`).
+- **Modern Package Managers & Runtime Support**: Zero-latency lazy loading for NVM/Node, native Bun pathing, Cargo environment deduplication, and PNPM (with automated `$PNPM_HOME/bin` resolution for v10/v11+).
 - **Atuin Integration**: SQLite-backed shell history with encrypted synchronization, fuzzy search, and TUI exploration.
 - **Oh-My-Posh Dual Theme Engine**: Offline prompt rendering with dynamic user distinction:
   - Standard User: `clean-detailed` (transient prompt disabled to avoid layout shifts).
@@ -50,7 +53,7 @@ A high-performance, modular, and minimalist ZSH configuration suite. Designed fo
 ├── .zshrc                 # Core shell options, history, compinit, module loader
 ├── aliases.zsh            # Resilient aliases, abbreviations (zsh-abbr), git, safe ls & clear
 ├── bindings.zsh           # Vi-mode configuration, Magic Sudo (Alt+S), Atuin hooks
-├── dev-env.zsh            # Integrations: Atuin, NVM (lazy load), Bun, PNPM, Cargo, Homebrew, GCloud
+├── dev-env.zsh            # Integrations: Atuin, NVM (lazy load), Bun, PNPM, Cargo, Homebrew, Pay-Respects, IntelliShell, GCloud
 ├── fzf.zsh                # Fuzzy finder defaults and bat preview integration
 ├── fzf-tab.zsh            # Context-sensitive Tab completion rules and preview hooks
 ├── helpers.zsh            # Universal take() and multi-file extract() utilities
@@ -144,6 +147,7 @@ vgif video.mp4 animation.gif 15 480
 | `sc` / `scu` | `sudo systemctl` / `systemctl --user` | Service management |
 | `take <dir>` | `mkdir -p <dir> && cd <dir>` | Directory creation and traversal |
 | `extract <file(s)>` | `tar / unzip / 7z / unrar / unzstd` | Automatic single and batch archive extraction |
+| `fuck` | `pay-respects zsh --alias fuck --nocnf` | Instant command auto-correction |
 | `posh-theme` | `posh-theme [name]` | Interactive theme selector and downloader (150+ themes) |
 
 ---
@@ -268,7 +272,8 @@ make test
 make test-installer
 ```
 
-For test scenarios and verification criteria, refer to:
+For extensive documentation, guides, test scenarios, and verification criteria, refer to:
+- [Official Knowledge Base & Wiki](./wiki/Home.md) (or on [GitHub Wiki](https://github.com/Merxxotas/zsh-dotfiles/wiki))
 - [TEST_SCENARIOS.md](./TEST_SCENARIOS.md)
 - [SECURITY.md](./SECURITY.md)
 - [CONTRIBUTING.md](./CONTRIBUTING.md)
@@ -277,12 +282,13 @@ For test scenarios and verification criteria, refer to:
 
 ## Continuous Integration
 
-This repository includes a multi-distribution CI matrix running on GitHub Actions:
+This repository includes an automated testing and deployment suite running on GitHub Actions:
 
 - **Debian / Ubuntu**: Tests against Ubuntu 24.04 LTS, Ubuntu 22.04 LTS, Debian 12 (Bookworm), and Debian 11.
 - **Arch / Fedora / openSUSE**: Tests against Arch Linux, Fedora, and openSUSE Leap.
 - **Enterprise / Alpine**: Tests against Rocky Linux 9, AlmaLinux 9, and Alpine Linux.
 - **Automated Test Suite**: Executes unit and integration test suites offline.
+- **Wiki Sync**: Synchronizes local `wiki/` documentation directly to GitHub Wiki.
 
 ---
 
