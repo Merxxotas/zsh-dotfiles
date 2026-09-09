@@ -45,7 +45,11 @@ export BUN_INSTALL="$HOME/.bun"
 [ -d "$BUN_INSTALL/bin" ] && path=("$BUN_INSTALL/bin" $path)
 
 export PNPM_HOME="$XDG_DATA_HOME/pnpm"
-[ -d "$PNPM_HOME" ] && path=("$PNPM_HOME" $path)
+path=(
+  "$PNPM_HOME/bin"
+  "$PNPM_HOME"
+  $path
+)
 
 # Cargo environment
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"

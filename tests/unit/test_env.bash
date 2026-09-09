@@ -43,5 +43,14 @@ echo "Running unit tests for .zshenv..."
   assert_success $? "GPG_TTY should not be set to 'not a tty' in non-interactive shell"
 )
 
+# Test 4: PNPM directories ($PNPM_HOME/bin and $PNPM_HOME) are in PATH
+(
+  zsh -c "
+    source '$SCRIPT_DIR/.config/zsh/.zshenv'
+    echo \"\$PATH\" | grep -q \"\$PNPM_HOME/bin\" && echo \"\$PATH\" | grep -q \"\$PNPM_HOME\"
+  "
+  assert_success $? "PNPM_HOME/bin and PNPM_HOME should be present in PATH"
+)
+
 teardown_sandbox
 echo ".zshenv tests passed successfully!"
