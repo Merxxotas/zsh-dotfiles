@@ -392,7 +392,7 @@ install_packages() {
     ubuntu|debian|pop|linuxmint)
       if [ -f /etc/debian_version ] && grep -q '^11' /etc/debian_version; then
         run_sudo sed -i '/bullseye-security/d' /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null || true
-        run_sudo apt-get install -y --allow-downgrades perl-base 2>/dev/null || true
+        run_sudo apt-get install -y --allow-downgrades perl-base=5.32.1-4+deb11u3 2>/dev/null || true
       fi
       run_sudo apt-get update -o Acquire::Check-Valid-Until=false -y 2>/dev/null || run_sudo apt-get update -y || true
       run_sudo apt-get install -y --allow-downgrades zsh fzf bat fd-find curl git jq neovim unzip tar ffmpeg yt-dlp || true
