@@ -390,7 +390,7 @@ install_packages() {
   echo -e "\n${BLUE}${BOLD}[INFO] Installing system dependencies...${NC}"
   case "$OS" in
     ubuntu|debian|pop|linuxmint)
-      run_sudo apt-get update -y
+      run_sudo apt-get update -o Acquire::Check-Valid-Until=false -y 2>/dev/null || run_sudo apt-get update -y || true
       run_sudo apt-get install -y zsh fzf bat fd-find curl git jq neovim unzip tar ffmpeg yt-dlp || true
       mkdir -p "$TARGET_HOME/.local/bin"
       if command -v batcat >/dev/null 2>&1; then

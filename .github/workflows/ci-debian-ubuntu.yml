@@ -26,7 +26,10 @@ jobs:
     steps:
       - name: Install bootstrap dependencies
         run: |
-          apt-get update -y
+          if [ -f /etc/debian_version ] && grep -q '^11\.' /etc/debian_version; then
+            echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+          fi
+          apt-get update -o Acquire::Check-Valid-Until=false -y || apt-get update -y
           apt-get install -y sudo curl git zsh ca-certificates
 
       - name: Checkout repository
