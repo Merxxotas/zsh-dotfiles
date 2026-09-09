@@ -2,7 +2,7 @@
 # ~/.config/zsh/bindings.zsh - Keybindings & Vi-Mode
 # =========================================================
 
-# Cursor Shape: Beam in Insert Mode (|), Solid Block in Normal/Visual Mode (█)
+# Cursor Shape: Beam in Insert Mode (|), Solid Block in Normal/Visual Mode
 ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BEAM
 ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLOCK
 ZVM_VISUAL_MODE_CURSOR=$ZVM_CURSOR_BLOCK

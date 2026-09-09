@@ -1,4 +1,4 @@
-# Welcome to ZSH Dotfiles Wiki 🐚
+# ZSH Dotfiles Technical Documentation and Wiki
 
 Welcome to the central technical documentation and knowledge base for **ZSH Dotfiles (Universal Modular Architecture)**.
 
@@ -6,7 +6,7 @@ This wiki provides comprehensive architecture deep-dives, operational references
 
 ---
 
-## 🗺️ System Architecture Overview
+## System Architecture Overview
 
 ```text
 +----------------------------------------------------------------------------------------------------+
@@ -25,7 +25,7 @@ This wiki provides comprehensive architecture deep-dives, operational references
 
 ---
 
-## ⚡ Quick Navigation
+## Quick Navigation
 
 | Guide | Description & Coverage |
 | :--- | :--- |
@@ -40,7 +40,7 @@ This wiki provides comprehensive architecture deep-dives, operational references
 
 ---
 
-## 🏛️ Architectural Philosophy
+## Architectural Philosophy
 
 1. **Zero-Latency Startup (<30ms)**:
    All heavy runtimes (Node, NVM) use lazy loaders. The completion cache (`zcompdump`) is refreshed only once every 24 hours. Plugin loading executes without network dependencies.
@@ -53,9 +53,9 @@ This wiki provides comprehensive architecture deep-dives, operational references
 
 ---
 
-## 🔗 Quick Links
+## Repository Links
 
-* [📦 GitHub Repository](https://github.com/Merxxotas/zsh-dotfiles)
-* [🏷️ Releases & Changelog](https://github.com/Merxxotas/zsh-dotfiles/releases)
-* [🐛 Issue Tracker](https://github.com/Merxxotas/zsh-dotfiles/issues)
-* [📜 MIT License](https://github.com/Merxxotas/zsh-dotfiles/blob/main/LICENSE)
+* [GitHub Repository](https://github.com/Merxxotas/zsh-dotfiles)
+* [Releases & Changelog](https://github.com/Merxxotas/zsh-dotfiles/releases)
+* [Issue Tracker](https://github.com/Merxxotas/zsh-dotfiles/issues)
+* [MIT License](https://github.com/Merxxotas/zsh-dotfiles/blob/main/LICENSE)
