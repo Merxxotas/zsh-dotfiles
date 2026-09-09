@@ -1,0 +1,51 @@
+name: Wiki Sync
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'wiki/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-wiki:
+    name: Sync Local Wiki to GitHub Wiki
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync wiki documentation
+        run: |
+          if [ ! -d "wiki" ]; then
+            echo "No wiki directory found, skipping."
+            exit 0
+          fi
+
+          WIKI_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git"
+          TMP_DIR=$(mktemp -d)
+
+          if git clone "$WIKI_URL" "$TMP_DIR" 2>/dev/null; then
+            echo "==> GitHub Wiki repository detected. Syncing pages..."
+            rm -rf "$TMP_DIR"/*
+            cp -r wiki/* "$TMP_DIR"/
+            cd "$TMP_DIR"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add .
+            if git diff --staged --quiet; then
+              echo "[OK] No changes to sync to wiki."
+            else
+              git commit -m "docs(wiki): sync wiki documentation from main branch [skip ci]"
+              git push origin HEAD
+              echo "[OK] Wiki successfully synchronized!"
+            fi
+          else
+            echo "[INFO] GitHub Wiki git repository is not yet initialized on GitHub."
+            echo "To initialize, navigate to https://github.com/${{ github.repository }}/wiki and click 'Create the first page'."
+            echo "Subsequent pushes will automatically synchronize all pages."
+          fi
