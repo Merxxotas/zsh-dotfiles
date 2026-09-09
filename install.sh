@@ -390,6 +390,9 @@ install_packages() {
   echo -e "\n${BLUE}${BOLD}[INFO] Installing system dependencies...${NC}"
   case "$OS" in
     ubuntu|debian|pop|linuxmint)
+      if [ -f /etc/debian_version ] && grep -q '^11\.' /etc/debian_version; then
+        run_sudo sed -i '/bullseye-security/d' /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null || true
+      fi
       run_sudo apt-get update -o Acquire::Check-Valid-Until=false -y 2>/dev/null || run_sudo apt-get update -y || true
       run_sudo apt-get install -y zsh fzf bat fd-find curl git jq neovim unzip tar ffmpeg yt-dlp || true
       mkdir -p "$TARGET_HOME/.local/bin"
