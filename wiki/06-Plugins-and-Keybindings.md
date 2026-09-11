@@ -70,7 +70,7 @@ Configured across `aliases.zsh` and `zsh-abbr`. Abbreviations expand in real tim
 | `pac` / `pacu` | `sudo pacman -S` / `sudo pacman -Syu` | Arch Linux package management |
 | `sc` / `scu` | `sudo systemctl` / `systemctl --user` | Systemd service management |
 | `take <dir>` | `mkdir -p <dir> && cd <dir>` | Create directory and immediately navigate inside |
-| `extract <file(s)>` | `tar / unzip / 7z / unrar / unzstd` | Automatic single and batch archive extraction |
+| `extract <file(s)>` | `tar / unzip / 7z / unrar / unzstd` | Automatic single, batch, and multi-part/split archive extraction |
 | `fuck` | `pay-respects zsh --alias fuck --nocnf` | Instant command auto-correction |
 | `posh-theme` | `posh-theme [name]` | Interactive Oh-My-Posh theme selector |
 

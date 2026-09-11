@@ -27,7 +27,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y zsh tar gzip
+          sudo apt-get install -y zsh tar gzip p7zip-full
 
       - name: Run make test
         run: make test

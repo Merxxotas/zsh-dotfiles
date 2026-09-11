@@ -800,6 +800,7 @@ Evitar que una prueba dependa de las herramientas instaladas en la maquina del d
 - Batch parcialmente fallido.
 - Nombres con espacios y guiones iniciales.
 - Mensajes y codigos coherentes con el resumen.
+- Archivos multipartes (RAR, 7z, ZIP) con deteccion automatica y deduplicacion batch.
 
 #### `vconv`, `vaudio`, `vcut`, `vgif`
 

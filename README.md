@@ -66,7 +66,7 @@ cd ~/Projects/zsh-dotfiles
 | `fuck` | `fuck` | Instant command auto-correction via `pay-respects` |
 | `posh-theme` | `posh-theme [name]` | Interactive Oh-My-Posh theme switcher (150+ themes) |
 | `take` | `take path/to/dir` | Create nested directory and navigate into it (`mkdir -p && cd`) |
-| `extract` | `extract archive.tar.gz` | Universal batch archive extractor (`zip`, `tar`, `7z`, `rar`) |
+| `extract` | `extract archive.tar.gz` | Universal batch archive extractor (`zip`, `tar`, `7z`, `rar`, multi-part/split archives) |
 | `vdl` | `vdl "<url>" -q 1080` | Universal video downloader (YouTube, X, TikTok, Twitch, Reddit) |
 | `adl` | `adl "<url>"` | High-fidelity 320kbps audio downloader with embedded art |
 | `vconv` | `vconv input.webm mp4` | Video converter and batch transcoder (`-f` for stream copy) |

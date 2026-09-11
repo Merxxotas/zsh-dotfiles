@@ -17,7 +17,7 @@ All files reside neatly within the XDG hierarchy:
 ├── dev-env.zsh            # Integrations: Atuin, NVM (lazy load), Bun, PNPM, Cargo, Homebrew, Pay-Respects, IntelliShell
 ├── fzf.zsh                # Fuzzy finder defaults and bat preview integration
 ├── fzf-tab.zsh            # Context-sensitive Tab completion rules and preview hooks
-├── helpers.zsh            # Universal take() and multi-file extract() utilities
+├── helpers.zsh            # Universal take() and multi-file/multipart extract() utilities
 ├── local.zsh.example      # Template for private host-specific variables and API keys
 ├── media.zsh              # Universal media suite: vconv, vdl, adl, vaudio, vcut, vgif
 ├── plugins.zsh            # Autonomous zero-overhead Git plugin loader and updater
