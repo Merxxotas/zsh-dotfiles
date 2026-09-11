@@ -18,7 +18,7 @@ make test
 | **TS-02** | `test_media.bash` | `media.zsh` | **Automated** | `vdl` parser, strict quality bounds, error codes on missing inputs |
 | **TS-03** | `test_prompt.bash` | `prompt.zsh` | **Automated** | Theme sanitization, JSON security, XDG cache persistence |
 | **TS-04** | `test_env.bash` | `.zshenv` | **Automated** | XDG defaults preservation, PATH deduplication, GPG_TTY safety, PNPM bin PATH resolution |
-| **TS-05** | `test_helpers.bash` | `helpers.zsh` | **Automated** | `take` argument validation, `extract` batch error codes |
+| **TS-05** | `test_helpers.bash` | `helpers.zsh` | **Automated** | `take` argument validation, `extract` batch error codes, and multi-part archive handling |
 | **TS-06** | `test_plugins.bash` | `plugins.zsh` | **Automated** | Zero network during startup, `plugins.lock` integrity |
 
 ---
