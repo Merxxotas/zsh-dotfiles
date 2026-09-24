@@ -37,6 +37,7 @@ path=(
   "$HOME/.local/bin"
   "$HOME/.cargo/bin"
   "$HOME/.atuin/bin"
+  "$HOME/.npm-global/bin"
   $path
 )
 
