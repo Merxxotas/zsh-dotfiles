@@ -52,5 +52,14 @@ echo "Running unit tests for .zshenv..."
   assert_success $? "PNPM_HOME/bin and PNPM_HOME should be present in PATH"
 )
 
+# Test 5: npm-global bin directory is in PATH
+(
+  zsh -c "
+    source '$SCRIPT_DIR/.config/zsh/.zshenv'
+    echo \"\$PATH\" | grep -q '\.npm-global/bin'
+  "
+  assert_success $? "npm-global/bin should be present in PATH"
+)
+
 teardown_sandbox
 echo ".zshenv tests passed successfully!"

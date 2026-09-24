@@ -99,3 +99,21 @@ if command -v atuin >/dev/null 2>&1; then
 fi
 ```
 Triggered interactively via `Ctrl + R`.
+
+---
+
+## User-Space Global NPM (`~/.npm-global/bin`)
+
+To avoid requiring `sudo` for global npm packages, users can configure `npm config set prefix ~/.npm-global`.
+The `$HOME/.npm-global/bin` directory is automatically included in `.zshenv`'s consolidated universal PATH:
+```zsh
+path=(
+  "$HOME/.local/bin"
+  "$HOME/.cargo/bin"
+  "$HOME/.atuin/bin"
+  "$HOME/.npm-global/bin"
+  $path
+)
+```
+This guarantees user-space npm CLI tools (such as OpenCLI, Codegraph, and mcporter) are immediately accessible across all interactive and non-interactive shells.
+
