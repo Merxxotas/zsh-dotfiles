@@ -72,6 +72,7 @@ cd ~/Projects/zsh-dotfiles
 | `vconv` | `vconv input.webm mp4` | Video converter and batch transcoder (`-f` for stream copy) |
 | `vcut` | `vcut video.mp4 01:00 02:30` | Lossless stream-copy trimming without re-encoding |
 | `vgif` | `vgif video.mp4 anim.gif` | 2-pass high-quality animated GIF generator |
+| `gentle-shell` | `gentle-shell` | Workspace safety guard preventing accidental repo initialization in `$HOME` |
 
 ---
 

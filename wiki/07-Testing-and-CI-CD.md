@@ -32,6 +32,7 @@ make lint
 | **TS-04** | `test_env.bash` | `.zshenv` | XDG variables, PATH deduplication, PNPM bin paths |
 | **TS-05** | `test_helpers.bash` | `helpers.zsh` | `take` and `extract` batch & multi-part extraction error handling |
 | **TS-06** | `test_plugins.bash` | `plugins.zsh` | Offline startup verification, commit SHA lock check |
+| **TS-07** | `test_dev_env.bash` | `dev-env.zsh` | AI agent & git workspace safety guards ($HOME protection) |
 
 ---
 

@@ -117,3 +117,46 @@ path=(
 ```
 This guarantees user-space npm CLI tools (such as OpenCLI, Codegraph, and mcporter) are immediately accessible across all interactive and non-interactive shells.
 
+---
+
+## AI Agent & Workspace Safety Guards (Gentle Shell & Git)
+
+AI coding harnesses and agents (such as `gentle-shell` and `gentle-ai`) require a distinct Git workspace to calculate review budgets and project authority. When invoked directly inside `$HOME` (`~`), upstream review routines may automatically initialize a Git repository (`git init $PWD`), unintentionally tracking the user's entire home directory.
+
+To prevent this issue, `dev-env.zsh` includes defensive shell wrappers:
+
+### 1. `gentle-shell` & `gentle-ai` Guards
+Intercepts invocation when `$PWD == $HOME`:
+```zsh
+gentle-shell() {
+  if [[ -z "${GENTLE_ALLOW_HOME:-}" && "$PWD" == "$HOME" ]]; then
+    echo "[ERROR] Cannot run gentle-shell directly in \$HOME (~)." >&2
+    echo "[INFO] Navigate to a project workspace directory first (e.g. cd ~/Projects/<repo>)." >&2
+    echo "[HINT] Set GENTLE_ALLOW_HOME=1 to override if intentional." >&2
+    return 1
+  fi
+  command gentle-shell "$@"
+}
+```
+* **Safe Subcommands**: `gentle-ai` allows informational commands (`doctor`, `version`, `help`, `update`, `telemetry`) from any directory, while blocking mutating or review actions (`review`, `install`, `sync`) within `$HOME`.
+* **Explicit Override**: Set `GENTLE_ALLOW_HOME=1` to bypass the guard when explicitly needed.
+
+### 2. Git Home Initialization Guard
+Intercepts bare or explicit `git init` calls targeting `$HOME`:
+```zsh
+git() {
+  if [[ "$1" == "init" && -z "${GIT_ALLOW_HOME_INIT:-}" ]]; then
+    local target="${2:-$PWD}"
+    if [[ "$target" == "." ]]; then target="$PWD"; fi
+    if [[ "$target" == "$HOME" || ( "$PWD" == "$HOME" && $# -le 1 ) || "$target" == "~" ]]; then
+      echo "[ERROR] Refusing to initialize a Git repository directly in \$HOME (~)." >&2
+      echo "[INFO] Navigate to or specify a project workspace directory first." >&2
+      echo "[HINT] Set GIT_ALLOW_HOME_INIT=1 to override if intentional." >&2
+      return 1
+    fi
+  fi
+  command git "$@"
+}
+```
+* **Explicit Override**: `GIT_ALLOW_HOME_INIT=1 git init` allows intentional repository creation in home if needed.
+
