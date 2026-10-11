@@ -72,3 +72,51 @@ export PATH="$INTELLI_HOME/bin:$PATH"
 if command -v intelli-shell >/dev/null 2>&1; then
   eval "$(intelli-shell init zsh)"
 fi
+
+# --- AI Agent & Git Workspace Safety Guards ---
+# Prevents accidental repository initialization in $HOME (~).
+# Upstream AI tools (e.g. gentle-shell / gentle-ai review commands) can invoke 'git init'
+# when executed directly within $HOME without an explicit project boundary.
+gentle-shell() {
+  if [[ -z "${GENTLE_ALLOW_HOME:-}" && "$PWD" == "$HOME" ]]; then
+    echo "[ERROR] Cannot run gentle-shell directly in \$HOME (~)." >&2
+    echo "[INFO] Navigate to a project workspace directory first (e.g. cd ~/Projects/<repo>)." >&2
+    echo "[HINT] Set GENTLE_ALLOW_HOME=1 to override if intentional." >&2
+    return 1
+  fi
+  command gentle-shell "$@"
+}
+
+gentle-ai() {
+  case "$1" in
+    doctor|version|--version|-v|--help|-h|help|update|telemetry|restore)
+      command gentle-ai "$@"
+      ;;
+    *)
+      if [[ -z "${GENTLE_ALLOW_HOME:-}" && "$PWD" == "$HOME" ]]; then
+        local subcmd="${1:-workspace}"
+        echo "[ERROR] Cannot run 'gentle-ai $subcmd' directly in \$HOME (~)." >&2
+        echo "[INFO] Navigate to a project workspace directory first (e.g. cd ~/Projects/<repo>)." >&2
+        echo "[HINT] Set GENTLE_ALLOW_HOME=1 to override if intentional." >&2
+        return 1
+      fi
+      command gentle-ai "$@"
+      ;;
+  esac
+}
+
+git() {
+  if [[ "$1" == "init" && -z "${GIT_ALLOW_HOME_INIT:-}" ]]; then
+    local target="${2:-$PWD}"
+    if [[ "$target" == "." ]]; then
+      target="$PWD"
+    fi
+    if [[ "$target" == "$HOME" || ( "$PWD" == "$HOME" && $# -le 1 ) || "$target" == "~" ]]; then
+      echo "[ERROR] Refusing to initialize a Git repository directly in \$HOME (~)." >&2
+      echo "[INFO] Navigate to or specify a project workspace directory first." >&2
+      echo "[HINT] Set GIT_ALLOW_HOME_INIT=1 to override if intentional." >&2
+      return 1
+    fi
+  fi
+  command git "$@"
+}

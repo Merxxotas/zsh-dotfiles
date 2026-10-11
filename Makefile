@@ -37,6 +37,7 @@ test-installer:
 	@bash tests/integration/test_installer.bash
 
 test-runtime:
+	@bash tests/unit/test_dev_env.bash
 	@bash tests/unit/test_helpers.bash
 	@bash tests/unit/test_media.bash
 	@bash tests/unit/test_prompt.bash

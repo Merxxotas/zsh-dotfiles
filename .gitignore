@@ -24,3 +24,6 @@ secrets.zsh
 *.local.zsh
 .env*
 
+# CodeGraph repository indices
+.codegraph/
+

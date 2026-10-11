@@ -20,6 +20,7 @@ make test
 | **TS-04** | `test_env.bash` | `.zshenv` | **Automated** | XDG defaults preservation, PATH deduplication, GPG_TTY safety, PNPM bin PATH resolution |
 | **TS-05** | `test_helpers.bash` | `helpers.zsh` | **Automated** | `take` argument validation, `extract` batch error codes, and multi-part archive handling |
 | **TS-06** | `test_plugins.bash` | `plugins.zsh` | **Automated** | Zero network during startup, `plugins.lock` integrity |
+| **TS-07** | `test_dev_env.bash` | `dev-env.zsh` | **Automated** | AI agent and git workspace safety guards preventing `$HOME` repository pollution |
 
 ---
 
