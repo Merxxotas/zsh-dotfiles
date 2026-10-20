@@ -63,3 +63,14 @@ fi
 2. **`$ZDOTDIR/.zshenv`** initializes XDG base directories, sets default `EDITOR="nvim"`, universal `TERM` fallback, and consolidates the system `$PATH` (deduplicated via `typeset -U path PATH`).
 3. **`$ZDOTDIR/.zshrc`** is read next in interactive shells. It initializes history options, completion caching, and sources modular components in order.
 4. **`$ZDOTDIR/local.zsh`** (if present) is loaded last to inject machine-specific secrets and overrides.
+
+### Multi-User Isolation
+
+On hosts shared by more than one ZSH user, `zsh-abbr` and its `zsh-job-queue` dependency default their scratch directories to `/tmp`. The first account to create them owns the directory, and every other account then fails with `permission denied`. `$ZDOTDIR/.zshenv` scopes both variables to the calling UID:
+
+```zsh
+export JOB_QUEUE_TMPDIR="${XDG_RUNTIME_DIR:-/tmp}/zsh-job-queue-$UID"
+export ABBR_TMPDIR="${XDG_RUNTIME_DIR:-/tmp}/zsh-abbr-$UID"
+```
+
+`XDG_RUNTIME_DIR` already resolves to `/run/user/<UID>` on systemd hosts, so the `/tmp` fallback only applies to minimal or containerised environments. Keep these definitions in `$ZDOTDIR/.zshenv` only — duplicating them in the root fallback creates two sources of truth that silently drift apart.

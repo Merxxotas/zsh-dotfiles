@@ -61,5 +61,13 @@ echo "Running unit tests for .zshenv..."
   assert_success $? "npm-global/bin should be present in PATH"
 )
 
+# Test 6: zsh-abbr and zsh-job-queue temp dirs are isolated per user
+(
+  runtime_dir="${XDG_RUNTIME_DIR:-/tmp}"
+  out="$(zsh -c "source '$SCRIPT_DIR/.config/zsh/.zshenv'; print -r -- \"\$JOB_QUEUE_TMPDIR|\$ABBR_TMPDIR\"")"
+  assert_equal "$out" "${runtime_dir}/zsh-job-queue-$(id -u)|${runtime_dir}/zsh-abbr-$(id -u)" \
+    "JOB_QUEUE_TMPDIR and ABBR_TMPDIR should be scoped to the current UID"
+)
+
 teardown_sandbox
 echo ".zshenv tests passed successfully!"
