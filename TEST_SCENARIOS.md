@@ -6,21 +6,13 @@ Technical verification suite for validating features and functionality of the ZS
 
 ## Automated Test Suite Matrix
 
-Run all offline automated tests with:
+The `TS-##` matrix — which suite covers which target, and how to run it — is maintained in **[wiki/07-Testing-and-CI-CD.md](./wiki/07-Testing-and-CI-CD.md)**. Run everything with:
 
 ```bash
 make test
 ```
 
-| ID | Suite | Target | Status | Coverage |
-| :--- | :--- | :--- | :---: | :--- |
-| **TS-01** | `test_installer.bash` | `install.sh` | **Automated** | Copy, symlink, transitions, backups, dry-run, unknown arguments |
-| **TS-02** | `test_media.bash` | `media.zsh` | **Automated** | `vdl` parser, strict quality bounds, error codes on missing inputs |
-| **TS-03** | `test_prompt.bash` | `prompt.zsh` | **Automated** | Theme sanitization, JSON security, XDG cache persistence |
-| **TS-04** | `test_env.bash` | `.zshenv` | **Automated** | XDG defaults preservation, PATH deduplication, GPG_TTY safety, PNPM bin PATH resolution |
-| **TS-05** | `test_helpers.bash` | `helpers.zsh` | **Automated** | `take` argument validation, `extract` batch error codes, and multi-part archive handling |
-| **TS-06** | `test_plugins.bash` | `plugins.zsh` | **Automated** | Zero network during startup, `plugins.lock` integrity |
-| **TS-07** | `test_dev_env.bash` | `dev-env.zsh` | **Automated** | AI agent and git workspace safety guards preventing `$HOME` repository pollution |
+This document covers only the **manual and interactive** scenarios that cannot be automated.
 
 ---
 

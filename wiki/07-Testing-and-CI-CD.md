@@ -24,6 +24,8 @@ make lint
 
 ## Test Suites Matrix
 
+> **Canonical source** for the `TS-##` identifiers. `TEST_SCENARIOS.md` documents only the manual and interactive scenarios. When a suite is added or its coverage changes, update this table — the working rules live in [`AGENTS.md`](../AGENTS.md).
+
 | Suite | File | Targets | Coverage |
 | :--- | :--- | :--- | :--- |
 | **TS-01** | `test_installer.bash` | `install.sh` | Copy, symlink, transitions, backups, dry-run |

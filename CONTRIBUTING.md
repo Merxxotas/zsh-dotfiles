@@ -37,13 +37,15 @@ make verify
 
 ## 2. Core Principles & Rules
 
-1. **Zero Network During Startup**: Never introduce `curl`, `wget`, or `git` commands into `.zshrc`, `.zshenv`, or startup modules.
-2. **Deterministic Locking**:
-   - New plugins must be pinned to exact 40-character commit SHAs in [`plugins.lock`](./plugins.lock).
-   - Standalone tools must have exact versions, URLs, and SHA256 checksums in [`dependencies.lock`](./dependencies.lock).
-3. **No Blind Error Suppression**: Never use `|| true` on critical path operations without explicit warning and error code handling.
-4. **POSIX Portability**: Use `command -v` instead of `which`. Avoid GNU-only flags unless guarded by capability checks.
-5. **Safe File Handling**: Quote all parameter expansions and escape dynamic paths when inserting into buffers (`${(q)var}`).
+The non-negotiable rules live in **[`AGENTS.md`](./AGENTS.md) § 3 — Invariants**, which is the canonical, machine-readable contract for this repository. Summary:
+
+- **Zero network during startup** — no `curl`, `wget` or `git` in the startup path.
+- **Deterministic locking** — plugins pinned to 40-character commit SHAs, binaries pinned to version + SHA256.
+- **No blind error suppression** — no `|| true` on critical paths.
+- **POSIX portability** — `command -v`, never `which`; guard GNU-only flags.
+- **Safe file handling** — quote expansions, escape dynamic paths with `${(q)var}`.
+
+This summary is illustrative only. `AGENTS.md` also carries the repository map, which command to run for which change, per-file rules and known traps.
 
 ---
 
@@ -54,3 +56,4 @@ Before submitting your PR:
 - [ ] Verified that `make verify` passes with 0 failures.
 - [ ] Confirmed that working directory is clean (`git status`).
 - [ ] Formatted commit messages following [Conventional Commits](https://www.conventionalcommits.org/).
+- [ ] Updated [`AGENTS.md`](./AGENTS.md), [`CHANGELOG.md`](./CHANGELOG.md) or the [`wiki/`](./wiki/) chapters if the change affects them.
