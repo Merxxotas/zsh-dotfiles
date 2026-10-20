@@ -118,6 +118,16 @@ For full technical specifications, architecture diagrams, and comprehensive guid
 
 ---
 
+## Agent & Maintenance Entry Points
+
+| Document | Purpose |
+| :--- | :--- |
+| [**AGENTS.md**](./AGENTS.md) | Operating contract: repository map, invariants, verification matrix, per-file rules, known traps. |
+| [**CONTRIBUTING.md**](./CONTRIBUTING.md) | Contribution process, prerequisites and pull request checklist. |
+| [**CHANGELOG.md**](./CHANGELOG.md) | Release history index, from `v2.0.0` to the latest tag. |
+
+---
+
 ## License
 
 Distributed under the terms of the **[MIT License](LICENSE)**.
