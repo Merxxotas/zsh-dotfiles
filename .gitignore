@@ -27,3 +27,6 @@ secrets.zsh
 # CodeGraph repository indices
 .codegraph/
 
+# Gentle AI local artifacts (auto-generated, machine-specific absolute paths)
+.atl/
+
