@@ -69,5 +69,13 @@ echo "Running unit tests for .zshenv..."
     "JOB_QUEUE_TMPDIR and ABBR_TMPDIR should be scoped to the current UID"
 )
 
+# Test 7: root fallback sources $ZDOTDIR/.zshenv (guards against silent drift)
+(
+  mkdir -p "$HOME/.config/zsh"
+  printf 'export ZSHENV_MARKER=sourced\n' > "$HOME/.config/zsh/.zshenv"
+  XDG_CONFIG_HOME= zsh -c "source '$SCRIPT_DIR/.zshenv'; [ \"\$ZSHENV_MARKER\" = sourced ]"
+  assert_success $? "root ~/.zshenv should source \$ZDOTDIR/.zshenv when present"
+)
+
 teardown_sandbox
 echo ".zshenv tests passed successfully!"

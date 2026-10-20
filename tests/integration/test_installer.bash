@@ -22,6 +22,8 @@ echo "Running integration tests for install.sh..."
   assert_is_regular_dir "$HOME/.config/zsh" "ZDOTDIR should be a regular directory"
   assert_is_regular_file "$HOME/.config/zsh/.zshrc" ".zshrc should be a regular file in copy mode"
   assert_is_regular_file "$HOME/.zshenv" ".zshenv should be a regular file in copy mode"
+  diff -q "$HOME/.zshenv" "$SCRIPT_DIR/.zshenv" >/dev/null
+  assert_success $? "copy mode should deploy ~/.zshenv byte-identical to the repo template"
 )
 
 # Test 2: Clean symlink installation
