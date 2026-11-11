@@ -398,9 +398,13 @@ install_pay_respects() {
     arch|cachyos|manjaro|endeavouros)
       if [ "$(id -u)" -ne 0 ]; then
         if command -v paru >/dev/null 2>&1; then
-          paru -S --needed --noconfirm pay-respects-bin 2>/dev/null && return 0 || true
+          if paru -S --needed --noconfirm pay-respects-bin 2>/dev/null; then
+            return 0
+          fi
         elif command -v yay >/dev/null 2>&1; then
-          yay -S --needed --noconfirm pay-respects-bin 2>/dev/null && return 0 || true
+          if yay -S --needed --noconfirm pay-respects-bin 2>/dev/null; then
+            return 0
+          fi
         fi
       fi
       ;;
@@ -420,7 +424,9 @@ install_pay_respects() {
         if curl -sL "https://github.com/iffse/pay-respects/releases/latest/download/pay-respects_0.9.0-1_${deb_arch}.deb" -o "$deb_file" 2>/dev/null; then
           run_sudo dpkg -i "$deb_file" >/dev/null 2>&1 || true
           rm -rf "$deb_tmp"
-          command -v pay-respects >/dev/null 2>&1 && return 0
+          if command -v pay-respects >/dev/null 2>&1; then
+            return 0
+          fi
         fi
         rm -rf "$deb_tmp"
       fi
@@ -431,7 +437,9 @@ install_pay_respects() {
       if [[ "$uname_arch" == "x86_64" || "$uname_arch" == "aarch64" ]] && command -v curl >/dev/null 2>&1; then
         local rpm_url="https://github.com/iffse/pay-respects/releases/latest/download/pay-respects-0.9.0-1.${uname_arch}.rpm"
         run_sudo dnf install -y "$rpm_url" >/dev/null 2>&1 || true
-        command -v pay-respects >/dev/null 2>&1 && return 0
+        if command -v pay-respects >/dev/null 2>&1; then
+          return 0
+        fi
       fi
       ;;
   esac
@@ -439,7 +447,9 @@ install_pay_respects() {
   # 2. Universal Cargo fallback (if Rust toolchain is installed)
   if command -v cargo >/dev/null 2>&1; then
     echo -e "  [INFO] Installing pay-respects via cargo..."
-    cargo install pay-respects >/dev/null 2>&1 && return 0 || true
+    if cargo install pay-respects >/dev/null 2>&1; then
+      return 0
+    fi
   fi
 
   return 0
