@@ -91,36 +91,260 @@ print('NOT_RESOLVED')
 " "$target_url" 2>/dev/null || echo "NOT_RESOLVED"
 }
 
+# --- Internal Helpers for vconv ---
+
+_vconv_get_duration() {
+  local file="$1"
+  if ! command -v ffprobe >/dev/null 2>&1; then
+    echo "-1"
+    return 1
+  fi
+  local dur
+  dur="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$file" 2>/dev/null)"
+  if [[ "$dur" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "${dur%%.*}"
+    return 0
+  fi
+  echo "-1"
+  return 1
+}
+
+_vconv_detect_hwaccel() {
+  if [[ -n "$_VCONV_HWACCEL_CACHE" ]]; then
+    echo "$_VCONV_HWACCEL_CACHE"
+    return 0
+  fi
+
+  local detected="cpu"
+
+  if [[ "$OSTYPE" == darwin* ]] && ffmpeg -hide_banner -loglevel error -f lavfi -i color=c=black:s=320x240:d=0.04 -c:v h264_videotoolbox -f null - >/dev/null 2>&1; then
+    detected="videotoolbox"
+  elif ffmpeg -hide_banner -loglevel error -f lavfi -i color=c=black:s=320x240:d=0.04 -c:v h264_nvenc -f null - >/dev/null 2>&1; then
+    detected="nvenc"
+  else
+    local render_node=""
+    for d in /dev/dri/renderD*; do
+      if [[ -c "$d" ]]; then
+        render_node="$d"
+        break
+      fi
+    done
+
+    if [[ -n "$render_node" ]] && ffmpeg -hide_banner -loglevel error -vaapi_device "$render_node" -f lavfi -i color=c=black:s=320x240:d=0.04 -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2,format=nv12,hwupload" -c:v h264_vaapi -f null - >/dev/null 2>&1; then
+      detected="vaapi:${render_node}"
+    elif ffmpeg -hide_banner -loglevel error -f lavfi -i color=c=black:s=320x240:d=0.04 -c:v h264_qsv -f null - >/dev/null 2>&1; then
+      detected="qsv"
+    fi
+  fi
+
+  typeset -g _VCONV_HWACCEL_CACHE="$detected"
+  echo "$detected"
+}
+
+_vconv_warn_cpu_if_long() {
+  local file="$1"
+  local codec="$2"
+  local dur
+  dur="$(_vconv_get_duration "$file")"
+  if [[ "$dur" =~ ^[0-9]+$ && "$dur" -ge 180 ]]; then
+    echo "[WARN] Processing '$file' via CPU ($codec, duration: ${dur}s). For videos > 3 min, conversion may take several minutes."
+  fi
+}
+
+_vconv_transcode_h264() {
+  local input="$1"
+  local output="$2"
+  local engine="$3"
+  local lossless="$4"
+
+  if [[ "$lossless" = true ]]; then
+    _vconv_warn_cpu_if_long "$input" "libx264-lossless"
+    ffmpeg -hide_banner -loglevel warning -stats -i "$input" \
+      -c:v libx264 -crf 0 -preset slow -pix_fmt yuv420p \
+      -c:a aac -b:a 192k "$output"
+    return $?
+  fi
+
+  case "$engine" in
+    videotoolbox)
+      echo "[INFO] Using hardware acceleration (GPU: videotoolbox)..."
+      ffmpeg -hide_banner -loglevel warning -stats -i "$input" \
+        -c:v h264_videotoolbox -q:v 60 -pix_fmt yuv420p \
+        -c:a aac -b:a 192k "$output"
+      ;;
+    nvenc)
+      echo "[INFO] Using hardware acceleration (GPU: nvenc)..."
+      ffmpeg -hide_banner -loglevel warning -stats -i "$input" \
+        -c:v h264_nvenc -preset p5 -cq 20 -pix_fmt yuv420p \
+        -c:a aac -b:a 192k "$output"
+      ;;
+    vaapi:*)
+      local dev="${engine#vaapi:}"
+      echo "[INFO] Using hardware acceleration (GPU: vaapi [$dev])..."
+      ffmpeg -hide_banner -loglevel warning -stats -vaapi_device "$dev" -i "$input" \
+        -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2,format=nv12,hwupload" -c:v h264_vaapi -qp 20 \
+        -c:a aac -b:a 192k "$output"
+      ;;
+    qsv)
+      echo "[INFO] Using hardware acceleration (GPU: qsv)..."
+      ffmpeg -hide_banner -loglevel warning -stats -i "$input" \
+        -c:v h264_qsv -global_quality 20 -pix_fmt yuv420p \
+        -c:a aac -b:a 192k "$output"
+      ;;
+    *)
+      _vconv_warn_cpu_if_long "$input" "libx264"
+      ffmpeg -hide_banner -loglevel warning -stats -i "$input" \
+        -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p \
+        -c:a aac -b:a 192k "$output"
+      ;;
+  esac
+}
+
+_vconv_usage() {
+  builtin print -r -- "Usage: vconv [options] <input_file(s)> <target_extension>
+
+Universal video transcoder with automatic GPU hardware acceleration
+(NVIDIA NVENC, AMD/Intel VA-API, Intel QSV, Apple VideoToolbox) and CPU fallback.
+
+Default Behavior:
+  GPU acceleration is detected and used AUTOMATICALLY (no flags needed).
+  If no GPU is present or if hardware encoding fails, it falls back to CPU automatically.
+
+Options:
+  -f, --fast        Fast stream copy without re-encoding (container switch, 0% quality loss)
+  --gpu             Strict GPU mode: require GPU hardware encoding (fails instead of falling back to CPU)
+  --cpu             Force CPU mode: encode with CPU only (ignores GPU; warns if video > 3 minutes)
+  --lossless        Mathematically lossless visual quality (-crf 0)
+  -h, --help        Show this help message
+
+Supported Output Formats:
+  Modern: mp4, mkv, mov, webm
+  Legacy: avi (MPEG-4/XviD + MP3), ts (MPEG-TS), wmv (Windows Media Video)
+
+Examples:
+  vconv video.webm mp4           # Normal use: auto-detects GPU and converts
+  vconv *.webm mp4               # Batch convert all WebM files in directory
+  vconv -f video.mkv mp4         # Fast stream copy without re-encoding
+  vconv --gpu video.webm mp4     # Strict GPU: fail if GPU is unavailable
+  vconv --cpu video.webm mp4     # Force CPU encoding for benchmarking
+  vconv --lossless clip.mkv mp4  # Lossless quality (-crf 0)
+  vconv clip.mp4 avi             # Convert to legacy AVI format"
+}
+
 # 1. vconv: Universal Video Format Transcoder (Single & Batch File Processing)
-# Usage: vconv [-f] <input_file(s)> <target_extension>
+# Usage: vconv [options] <input_file(s)> <target_extension>
 # Examples:
 #   vconv video.webm mp4
 #   vconv *.webm mp4
-#   vconv -f video.mkv mp4   (Fast stream copy without re-encoding)
+#   vconv -f video.mkv mp4         (Fast stream copy without re-encoding)
+#   vconv --cpu video.webm mp4     (Force CPU encoding)
+#   vconv --lossless video.mkv mp4 (Lossless visual quality, -crf 0)
+#   vconv --help                   (Show help and usage)
 vconv() {
+  # 1. Parse help before checking runtime dependencies
+  local arg
+  for arg in "$@"; do
+    if [[ "$arg" == "-h" || "$arg" == "--help" ]]; then
+      _vconv_usage
+      return 0
+    fi
+  done
+
   if ! command -v ffmpeg >/dev/null 2>&1; then
     echo "[ERROR] ffmpeg is not installed."
     return 1
   fi
 
   local fast_copy=false
-  if [[ "$1" == "-f" || "$1" == "--fast" ]]; then
-    fast_copy=true
-    shift
-  fi
+  local force_engine=""
+  local strict_gpu=false
+  local lossless=false
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -h|--help)
+        _vconv_usage
+        return 0
+        ;;
+      -f|--fast)
+        fast_copy=true
+        shift
+        ;;
+      --cpu)
+        force_engine="cpu"
+        shift
+        ;;
+      --gpu)
+        strict_gpu=true
+        shift
+        ;;
+      --lossless)
+        lossless=true
+        shift
+        ;;
+      --)
+        shift
+        break
+        ;;
+      -*)
+        echo "[ERROR] Unknown option: $1" >&2
+        echo "Run 'vconv --help' for usage details." >&2
+        return 1
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
 
   if [ $# -lt 2 ]; then
-    echo "Usage: vconv [-f] <input_file(s)> <target_extension>"
-    echo "Examples:"
-    echo "  vconv video.webm mp4"
-    echo "  vconv *.webm mp4"
-    echo "  vconv -f video.mkv mp4   (Fast stream copy without re-encoding)"
+    _vconv_usage
     return 1
   fi
 
   local target_ext="${@[-1]}"
   target_ext="${target_ext#.}"
   target_ext="${target_ext:l}"
+
+  # Validation for strict GPU mode and option incompatibilities
+  if [[ "$strict_gpu" = true ]]; then
+    if [[ "$force_engine" == "cpu" ]]; then
+      echo "[ERROR] Cannot combine --gpu and --cpu." >&2
+      return 1
+    fi
+    if [[ "$fast_copy" = true ]]; then
+      echo "[ERROR] --gpu cannot be combined with -f/--fast (stream copy does not re-encode)." >&2
+      return 1
+    fi
+    if [[ "$lossless" = true ]]; then
+      echo "[ERROR] --gpu cannot be combined with --lossless (lossless encoding requires CPU libx264 -crf 0)." >&2
+      return 1
+    fi
+    case "$target_ext" in
+      mp4|mov|mkv|ts) ;;
+      *)
+        echo "[ERROR] Target format '$target_ext' does not support GPU encoding in vconv." >&2
+        return 1
+        ;;
+    esac
+
+    # Ensure cached in session
+    if [[ -z "$_VCONV_HWACCEL_CACHE" ]]; then
+      _vconv_detect_hwaccel >/dev/null
+    fi
+
+    if [[ "$_VCONV_HWACCEL_CACHE" == "cpu" ]]; then
+      echo "[ERROR] --gpu requested, but no GPU hardware video encoder was detected." >&2
+      return 1
+    fi
+    force_engine="$_VCONV_HWACCEL_CACHE"
+  elif [[ -z "$force_engine" ]]; then
+    # Populate cache in session if not yet detected
+    if [[ -z "$_VCONV_HWACCEL_CACHE" ]]; then
+      _vconv_detect_hwaccel >/dev/null
+    fi
+    force_engine="$_VCONV_HWACCEL_CACHE"
+  fi
 
   local input_files=("${@[1,-2]}")
   local success=0
@@ -142,32 +366,56 @@ vconv() {
     fi
 
     echo "[INFO] Converting '$input' -> '$output'..."
+    local conv_status=0
+
     if [ "$fast_copy" = true ]; then
       ffmpeg -hide_banner -loglevel warning -stats -i "$input" -c copy "$output"
+      conv_status=$?
     else
       case "$target_ext" in
-        mp4|mov)
-          ffmpeg -hide_banner -loglevel warning -stats -i "$input" \
-            -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p \
-            -c:a aac -b:a 192k "$output"
+        mp4|mov|mkv|ts)
+          _vconv_transcode_h264 "$input" "$output" "$force_engine" "$lossless"
+          conv_status=$?
+
+          # Hot fallback to CPU if GPU failed and strict GPU was not requested
+          if [[ $conv_status -ne 0 && "$force_engine" != "cpu" && "$strict_gpu" != true ]]; then
+            echo "[WARN] GPU encoding failed for '$input'. Falling back to CPU (libx264)..."
+            rm -f "$output" 2>/dev/null
+            _vconv_transcode_h264 "$input" "$output" "cpu" "$lossless"
+            conv_status=$?
+          fi
           ;;
         webm)
+          _vconv_warn_cpu_if_long "$input" "libvpx-vp9"
           ffmpeg -hide_banner -loglevel warning -stats -i "$input" \
             -c:v libvpx-vp9 -crf 28 -b:v 0 \
             -c:a libopus -b:a 128k "$output"
+          conv_status=$?
           ;;
-        mkv)
+        avi)
+          _vconv_warn_cpu_if_long "$input" "mpeg4"
+          echo "[INFO] Using legacy MPEG-4/XviD encoder for AVI compatibility..."
           ffmpeg -hide_banner -loglevel warning -stats -i "$input" \
-            -c:v libx264 -preset slow -crf 18 \
-            -c:a aac -b:a 192k "$output"
+            -c:v mpeg4 -qscale:v 3 \
+            -c:a libmp3lame -b:a 192k "$output"
+          conv_status=$?
+          ;;
+        wmv)
+          _vconv_warn_cpu_if_long "$input" "wmv2"
+          echo "[INFO] Using Windows Media Video encoder for WMV compatibility..."
+          ffmpeg -hide_banner -loglevel warning -stats -i "$input" \
+            -c:v wmv2 -b:v 2M \
+            -c:a wmav2 -b:a 128k "$output"
+          conv_status=$?
           ;;
         *)
           ffmpeg -hide_banner -loglevel warning -stats -i "$input" "$output"
+          conv_status=$?
           ;;
       esac
     fi
 
-    if [ $? -eq 0 ]; then
+    if [ $conv_status -eq 0 ]; then
       echo "[OK] Successfully converted to '$output'"
       success=$((success + 1))
     else

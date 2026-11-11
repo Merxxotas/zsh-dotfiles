@@ -69,7 +69,7 @@ cd ~/Projects/zsh-dotfiles
 | `extract` | `extract archive.tar.gz` | Universal batch archive extractor (`zip`, `tar`, `7z`, `rar`, multi-part/split archives) |
 | `vdl` | `vdl "<url>" -q 1080` | Universal video downloader (YouTube, X, TikTok, Twitch, Reddit) |
 | `adl` | `adl "<url>"` | High-fidelity 320kbps audio downloader with embedded art |
-| `vconv` | `vconv input.webm mp4` | Video converter and batch transcoder (`-f` for stream copy) |
+| `vconv` | `vconv input.webm mp4` | Universal video transcoder with auto GPU acceleration & CPU fallback |
 | `vcut` | `vcut video.mp4 01:00 02:30` | Lossless stream-copy trimming without re-encoding |
 | `vgif` | `vgif video.mp4 anim.gif` | 2-pass high-quality animated GIF generator |
 | `gentle-shell` | `gentle-shell` | Workspace safety guard preventing accidental repo initialization in `$HOME` |
