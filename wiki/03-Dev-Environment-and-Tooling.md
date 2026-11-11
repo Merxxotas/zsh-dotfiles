@@ -71,6 +71,7 @@ fi
 ```
 * Aliased to `fuck`.
 * Configured with `--nocnf` to disable command-not-found hooks that interfere with interactive completions.
+* Automatically installed by `install.sh` via AUR helpers (`paru` / `yay`), distribution packages (`.deb` / `.rpm`), or `cargo`.
 
 ---
 

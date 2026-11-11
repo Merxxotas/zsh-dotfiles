@@ -385,6 +385,66 @@ install_locked_dependency() {
   return 0
 }
 
+# --- Auto-Correction Engine: pay-respects (Option A: Native package / AUR / Cargo) ---
+install_pay_respects() {
+  if command -v pay-respects >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo -e "  [INFO] Installing auto-correction engine (pay-respects)..."
+
+  # 1. Native distro detection & helpers
+  case "$OS" in
+    arch|cachyos|manjaro|endeavouros)
+      if [ "$(id -u)" -ne 0 ]; then
+        if command -v paru >/dev/null 2>&1; then
+          paru -S --needed --noconfirm pay-respects-bin 2>/dev/null && return 0 || true
+        elif command -v yay >/dev/null 2>&1; then
+          yay -S --needed --noconfirm pay-respects-bin 2>/dev/null && return 0 || true
+        fi
+      fi
+      ;;
+    ubuntu|debian|pop|linuxmint)
+      local uname_arch
+      uname_arch="$(uname -m)"
+      local deb_arch=""
+      case "$uname_arch" in
+        x86_64) deb_arch="amd64" ;;
+        aarch64|arm64) deb_arch="arm64" ;;
+      esac
+
+      if [ -n "$deb_arch" ] && command -v curl >/dev/null 2>&1; then
+        local deb_tmp
+        deb_tmp="$(mktemp -d)"
+        local deb_file="$deb_tmp/pay-respects.deb"
+        if curl -sL "https://github.com/iffse/pay-respects/releases/latest/download/pay-respects_0.9.0-1_${deb_arch}.deb" -o "$deb_file" 2>/dev/null; then
+          run_sudo dpkg -i "$deb_file" >/dev/null 2>&1 || true
+          rm -rf "$deb_tmp"
+          command -v pay-respects >/dev/null 2>&1 && return 0
+        fi
+        rm -rf "$deb_tmp"
+      fi
+      ;;
+    fedora|rhel|centos|rocky|almalinux)
+      local uname_arch
+      uname_arch="$(uname -m)"
+      if [[ "$uname_arch" == "x86_64" || "$uname_arch" == "aarch64" ]] && command -v curl >/dev/null 2>&1; then
+        local rpm_url="https://github.com/iffse/pay-respects/releases/latest/download/pay-respects-0.9.0-1.${uname_arch}.rpm"
+        run_sudo dnf install -y "$rpm_url" >/dev/null 2>&1 || true
+        command -v pay-respects >/dev/null 2>&1 && return 0
+      fi
+      ;;
+  esac
+
+  # 2. Universal Cargo fallback (if Rust toolchain is installed)
+  if command -v cargo >/dev/null 2>&1; then
+    echo -e "  [INFO] Installing pay-respects via cargo..."
+    cargo install pay-respects >/dev/null 2>&1 && return 0 || true
+  fi
+
+  return 0
+}
+
 # --- System Package Installer ---
 install_packages() {
   echo -e "\n${BLUE}${BOLD}[INFO] Installing system dependencies...${NC}"
@@ -448,6 +508,11 @@ install_packages() {
   fi
   if ! command -v atuin >/dev/null 2>&1; then
     install_locked_dependency "atuin" "$os_type" "$arch" || true
+  fi
+
+  # Auto-correction engine: pay-respects
+  if ! command -v pay-respects >/dev/null 2>&1; then
+    install_pay_respects || true
   fi
 }
 
