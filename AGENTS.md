@@ -120,7 +120,7 @@ How the targets behave:
 4. Publish it: `gh release create vX.Y.Z --title "vX.Y.Z - <title>" --notes-file <file> --verify-tag`.
 5. Record the entry in [`CHANGELOG.md`](./CHANGELOG.md).
 
-Versioning: **patch** = fix, **minor** = new user-facing behavior, **major** = breaking change. The current release is `v2.4.0`.
+Versioning: **patch** = fix, **minor** = new user-facing behavior, **major** = breaking change. The current release is `v2.5.0`.
 
 ---
 

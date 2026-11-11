@@ -12,6 +12,26 @@ Nothing yet.
 
 ---
 
+## [2.5.0] — 2026-11-11
+
+### Added
+- Automatic GPU hardware acceleration in `vconv` (`.config/zsh/media.zsh`): detects NVIDIA NVENC, AMD/Intel VA-API, Intel QSV, and Apple VideoToolbox on-demand with session-level caching (`_VCONV_HWACCEL_CACHE`).
+- Hot fallback to CPU (`libx264`) upon unexpected GPU encoding errors, cleaning up partial output files before retry.
+- Duration warning: CPU encoding automatically warns when input video length is 180 seconds (3 minutes) or longer, calculated via `ffprobe`.
+- Support for modern and legacy output formats: modern (`mp4`, `mkv`, `mov`, `webm`), legacy (`avi` via MPEG-4/XviD + MP3, `ts` via MPEG-TS, `wmv`).
+- Explicit CLI options in `vconv`: `--gpu` (strict GPU mode, fails if unavailable), `--cpu` (force CPU mode), `--lossless` (`-crf 0`), `-f`/`--fast` (stream copy), and `-h`/`--help` (clean POSIX output via `builtin print -r`).
+- Automated installation of `pay-respects` in `install.sh`: supports Arch (`paru`/`yay`), Debian/Ubuntu (`.deb`), Fedora/RHEL (`.rpm`), and universal `cargo` fallback.
+- Supply chain verification: pinned `pay-respects` v0.9.0 standalone artifacts and checksums in `dependencies.lock`.
+- 9 unit tests in `tests/unit/test_media.bash` (`TS-02`) covering unknown flags, help output without `ffmpeg`, `--gpu` validation, duration warnings, mock NVENC/CPU encoding, and fallback.
+
+### Documentation
+- Updated `wiki/04-Multimedia-Suite.md` with GPU acceleration details, format matrix, and command-line options.
+- Updated `wiki/03-Dev-Environment-and-Tooling.md` documenting `pay-respects` automated install.
+- Updated `wiki/07-Testing-and-CI-CD.md` reflecting `TS-02` expanded coverage.
+- Updated `README.md` CLI cheatsheet for `vconv`.
+
+---
+
 ## [2.4.0] — 2026-10-20
 
 ### Added
@@ -78,7 +98,8 @@ Nothing yet.
 
 ---
 
-[Unreleased]: https://github.com/Merxxotas/zsh-dotfiles/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/Merxxotas/zsh-dotfiles/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/Merxxotas/zsh-dotfiles/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/Merxxotas/zsh-dotfiles/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/Merxxotas/zsh-dotfiles/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/Merxxotas/zsh-dotfiles/compare/v2.1.0...v2.2.0
