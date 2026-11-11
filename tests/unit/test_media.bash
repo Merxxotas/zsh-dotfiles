@@ -44,6 +44,15 @@ output=$(zsh -c "source '$SCRIPT_DIR/.config/zsh/media.zsh'; vconv --invalid-opt
 assert_failure $? 1 "vconv with unknown option should return code 1"
 assert_output_contains "$output" "Unknown option" "vconv should report unknown option"
 
+# Test 8b: vconv with -h and --help displays usage and returns code 0
+output_h=$(zsh -c "source '$SCRIPT_DIR/.config/zsh/media.zsh'; vconv -h" 2>&1)
+assert_success $? "vconv -h should return code 0"
+assert_output_contains "$output_h" "Usage: vconv [options]" "vconv -h should display usage"
+
+output_help=$(zsh -c "source '$SCRIPT_DIR/.config/zsh/media.zsh'; vconv --help" 2>&1)
+assert_success $? "vconv --help should return code 0"
+assert_output_contains "$output_help" "Universal video transcoder" "vconv --help should display usage description"
+
 # Test 9: vconv --gpu when hwaccel is cpu returns code 1
 output=$(zsh -c "source '$SCRIPT_DIR/.config/zsh/media.zsh'; export _VCONV_HWACCEL_CACHE=cpu; vconv --gpu 'dummy.webm' mp4" 2>&1)
 assert_failure $? 1 "vconv --gpu without GPU should return code 1"

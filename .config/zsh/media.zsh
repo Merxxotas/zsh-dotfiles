@@ -206,14 +206,43 @@ _vconv_transcode_h264() {
   esac
 }
 
+_vconv_usage() {
+  cat <<'EOF'
+Usage: vconv [options] <input_file(s)> <target_extension>
+
+Universal video transcoder with automatic GPU hardware acceleration
+(NVIDIA NVENC, AMD/Intel VA-API, Intel QSV, Apple VideoToolbox) and CPU fallback.
+
+Options:
+  -f, --fast        Fast stream copy without re-encoding (container switch, 0% quality loss)
+  --cpu             Force CPU encoding (shows warning if video > 3 minutes)
+  --gpu             Force GPU encoding (fails if no GPU hardware encoder is available)
+  --lossless        Mathematically lossless visual quality (-crf 0)
+  -h, --help        Show this help message
+
+Supported Output Formats:
+  Modern: mp4, mkv, mov, webm
+  Legacy: avi (MPEG-4/XviD + MP3), ts (MPEG-TS), wmv (Windows Media Video)
+
+Examples:
+  vconv video.webm mp4           # Convert to MP4 with auto GPU acceleration
+  vconv *.webm mp4               # Batch convert all WebM files in directory
+  vconv -f video.mkv mp4         # Fast stream copy without re-encoding
+  vconv --cpu video.webm mp4     # Force CPU encoding
+  vconv --lossless clip.mkv mp4  # Lossless quality (-crf 0)
+  vconv clip.mp4 avi             # Convert to legacy AVI format
+EOF
+}
+
 # 1. vconv: Universal Video Format Transcoder (Single & Batch File Processing)
-# Usage: vconv [-f] [--cpu|--gpu] [--lossless] <input_file(s)> <target_extension>
+# Usage: vconv [options] <input_file(s)> <target_extension>
 # Examples:
 #   vconv video.webm mp4
 #   vconv *.webm mp4
 #   vconv -f video.mkv mp4         (Fast stream copy without re-encoding)
 #   vconv --cpu video.webm mp4     (Force CPU encoding)
 #   vconv --lossless video.mkv mp4 (Lossless visual quality, -crf 0)
+#   vconv --help                   (Show help and usage)
 vconv() {
   if ! command -v ffmpeg >/dev/null 2>&1; then
     echo "[ERROR] ffmpeg is not installed."
@@ -226,6 +255,10 @@ vconv() {
 
   while [ $# -gt 0 ]; do
     case "$1" in
+      -h|--help)
+        _vconv_usage
+        return 0
+        ;;
       -f|--fast)
         fast_copy=true
         shift
@@ -248,6 +281,7 @@ vconv() {
         ;;
       -*)
         echo "[ERROR] Unknown option: $1" >&2
+        echo "Run 'vconv --help' for usage details." >&2
         return 1
         ;;
       *)
@@ -257,13 +291,7 @@ vconv() {
   done
 
   if [ $# -lt 2 ]; then
-    echo "Usage: vconv [-f] [--cpu|--gpu] [--lossless] <input_file(s)> <target_extension>"
-    echo "Examples:"
-    echo "  vconv video.webm mp4"
-    echo "  vconv *.webm mp4"
-    echo "  vconv -f video.mkv mp4         (Fast stream copy without re-encoding)"
-    echo "  vconv --cpu video.webm mp4     (Force CPU encoding)"
-    echo "  vconv --lossless video.mkv mp4 (Lossless visual quality, -crf 0)"
+    _vconv_usage
     return 1
   fi
 
