@@ -29,7 +29,7 @@ make lint
 | Suite | File | Targets | Coverage |
 | :--- | :--- | :--- | :--- |
 | **TS-01** | `test_installer.bash` | `install.sh` | Copy, symlink, transitions, backups, dry-run |
-| **TS-02** | `test_media.bash` | `media.zsh` | `vdl` parser, quality constraints, error handling |
+| **TS-02** | `test_media.bash` | `media.zsh` | `vdl` parser & options, `vconv` GPU detection, fallback, duration thresholds & formats |
 | **TS-03** | `test_prompt.bash` | `prompt.zsh` | Theme sanitization, JSON safety, state persistence |
 | **TS-04** | `test_env.bash` | `.zshenv` | XDG variables, PATH deduplication, PNPM bin paths |
 | **TS-05** | `test_helpers.bash` | `helpers.zsh` | `take` and `extract` batch & multi-part extraction error handling |

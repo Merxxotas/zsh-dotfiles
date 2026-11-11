@@ -385,13 +385,59 @@ install_locked_dependency() {
   return 0
 }
 
-# --- Auto-Correction Engine: pay-respects (Option A: Native package / AUR / Cargo) ---
+# --- Auto-Correction Engine: pay-respects (Verified Standalone / AUR / Cargo) ---
+_fetch_and_verify_package() {
+  local entry_name="$1"
+  local target_arch="$2"
+  local dest_file="$3"
+  local lockfile="$SCRIPT_DIR/dependencies.lock"
+
+  [ -f "$lockfile" ] || return 1
+
+  local matched_url=""
+  local matched_sha=""
+  while IFS=$'\t' read -r dname dver dos darch durl dsha; do
+    [[ "$dname" =~ ^#.*$ || -z "$dname" ]] && continue
+    if [ "$dname" = "$entry_name" ] && [ "$darch" = "$target_arch" ]; then
+      matched_url="$durl"
+      matched_sha="$dsha"
+      break
+    fi
+  done < "$lockfile"
+
+  [ -n "$matched_url" ] || return 1
+
+  if ! curl -sL --proto '=https' --tlsv1.2 "$matched_url" -o "$dest_file"; then
+    return 1
+  fi
+
+  local computed_sha=""
+  if command -v sha256sum >/dev/null 2>&1; then
+    computed_sha="$(sha256sum "$dest_file" | awk '{print $1}')"
+  elif command -v shasum >/dev/null 2>&1; then
+    computed_sha="$(shasum -a 256 "$dest_file" | awk '{print $1}')"
+  fi
+
+  if [ -z "$computed_sha" ] || [ "$computed_sha" != "$matched_sha" ]; then
+    echo -e "  ${RED}[ERROR] Checksum mismatch for $entry_name ($target_arch)!${NC}" >&2
+    rm -f "$dest_file"
+    return 1
+  fi
+
+  return 0
+}
+
 install_pay_respects() {
   if command -v pay-respects >/dev/null 2>&1; then
     return 0
   fi
 
   echo -e "  [INFO] Installing auto-correction engine (pay-respects)..."
+
+  local uname_arch
+  uname_arch="$(uname -m)"
+  local arch="x86_64"
+  [[ "$uname_arch" == "aarch64" || "$uname_arch" == "arm64" ]] && arch="aarch64"
 
   # 1. Native distro detection & helpers
   case "$OS" in
@@ -409,19 +455,11 @@ install_pay_respects() {
       fi
       ;;
     ubuntu|debian|pop|linuxmint)
-      local uname_arch
-      uname_arch="$(uname -m)"
-      local deb_arch=""
-      case "$uname_arch" in
-        x86_64) deb_arch="amd64" ;;
-        aarch64|arm64) deb_arch="arm64" ;;
-      esac
-
-      if [ -n "$deb_arch" ] && command -v curl >/dev/null 2>&1; then
+      if command -v curl >/dev/null 2>&1; then
         local deb_tmp
         deb_tmp="$(mktemp -d)"
         local deb_file="$deb_tmp/pay-respects.deb"
-        if curl -sL "https://github.com/iffse/pay-respects/releases/latest/download/pay-respects_0.9.0-1_${deb_arch}.deb" -o "$deb_file" 2>/dev/null; then
+        if _fetch_and_verify_package "pay-respects-deb" "$arch" "$deb_file"; then
           run_sudo dpkg -i "$deb_file" >/dev/null 2>&1 || true
           rm -rf "$deb_tmp"
           if command -v pay-respects >/dev/null 2>&1; then
@@ -432,24 +470,33 @@ install_pay_respects() {
       fi
       ;;
     fedora|rhel|centos|rocky|almalinux)
-      local uname_arch
-      uname_arch="$(uname -m)"
-      if [[ "$uname_arch" == "x86_64" || "$uname_arch" == "aarch64" ]] && command -v curl >/dev/null 2>&1; then
-        local rpm_url="https://github.com/iffse/pay-respects/releases/latest/download/pay-respects-0.9.0-1.${uname_arch}.rpm"
-        run_sudo dnf install -y "$rpm_url" >/dev/null 2>&1 || true
-        if command -v pay-respects >/dev/null 2>&1; then
-          return 0
+      if command -v curl >/dev/null 2>&1; then
+        local rpm_tmp
+        rpm_tmp="$(mktemp -d)"
+        local rpm_file="$rpm_tmp/pay-respects.rpm"
+        if _fetch_and_verify_package "pay-respects-rpm" "$arch" "$rpm_file"; then
+          run_sudo dnf install -y "$rpm_file" >/dev/null 2>&1 || true
+          rm -rf "$rpm_tmp"
+          if command -v pay-respects >/dev/null 2>&1; then
+            return 0
+          fi
         fi
+        rm -rf "$rpm_tmp"
       fi
       ;;
   esac
 
-  # 2. Universal Cargo fallback (if Rust toolchain is installed)
+  # 2. Universal Cargo fallback (with exact pinned version and locked dependencies)
   if command -v cargo >/dev/null 2>&1; then
-    echo -e "  [INFO] Installing pay-respects via cargo..."
-    if cargo install pay-respects >/dev/null 2>&1; then
+    echo -e "  [INFO] Installing pay-respects via cargo (--version 0.9.0 --locked)..."
+    if cargo install --version 0.9.0 --locked pay-respects >/dev/null 2>&1; then
       return 0
     fi
+  fi
+
+  if ! command -v pay-respects >/dev/null 2>&1; then
+    echo -e "  ${YELLOW}[WARN] Could not install pay-respects automatically. Please install it manually to enable 'fuck'.${NC}" >&2
+    return 1
   fi
 
   return 0

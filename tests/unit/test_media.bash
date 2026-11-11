@@ -125,5 +125,21 @@ assert_success $? "vconv fallback should succeed"
 assert_output_contains "$output" "GPU encoding failed" "vconv should warn about GPU failure"
 assert_output_contains "$output" "RETRY_WITH_CPU_SUCCESS" "vconv should fall back to CPU"
 
+# Test 15: vconv --gpu rejects incompatible flags and unsupported formats
+output=$(zsh -c "source '$SCRIPT_DIR/.config/zsh/media.zsh'; export _VCONV_HWACCEL_CACHE=nvenc; vconv --gpu --lossless '$dummy_in' mp4" 2>&1)
+assert_failure $? 1 "vconv --gpu --lossless should return code 1"
+assert_output_contains "$output" "cannot be combined with --lossless" "vconv should reject --gpu --lossless"
+
+output=$(zsh -c "source '$SCRIPT_DIR/.config/zsh/media.zsh'; export _VCONV_HWACCEL_CACHE=nvenc; vconv --gpu '$dummy_in' avi" 2>&1)
+assert_failure $? 1 "vconv --gpu to avi should return code 1"
+assert_output_contains "$output" "does not support GPU encoding" "vconv should reject --gpu for avi"
+
+# Test 16: vconv -h works without ffmpeg in PATH
+mkdir -p "$SANDBOX_DIR/no_ffmpeg"
+ln -sf "$(command -v zsh)" "$SANDBOX_DIR/no_ffmpeg/zsh"
+output=$(PATH="$SANDBOX_DIR/no_ffmpeg" zsh -c "source '$SCRIPT_DIR/.config/zsh/media.zsh'; vconv -h" 2>&1)
+assert_success $? "vconv -h should succeed even without ffmpeg"
+assert_output_contains "$output" "Usage: vconv [options]" "vconv -h should show usage without ffmpeg"
+
 teardown_sandbox
 echo "media.zsh tests passed successfully!"

@@ -11,3 +11,7 @@ atuin	v18.21.0	linux	x86_64	https://github.com/atuinsh/atuin/releases/download/v
 atuin	v18.21.0	linux	aarch64	https://github.com/atuinsh/atuin/releases/download/v18.21.0/atuin-aarch64-unknown-linux-musl.tar.gz	9b8a76df370eba71ea0809d4df74f79351be2314c1ed90cae229499e69ca2ee1
 atuin	v18.21.0	macos	x86_64	https://github.com/atuinsh/atuin/releases/download/v18.21.0/atuin-x86_64-apple-darwin.tar.gz	74efd10b08bf21e5e9448e4b4c2fce9995c655928899b0375411d427bec3c347
 atuin	v18.21.0	macos	aarch64	https://github.com/atuinsh/atuin/releases/download/v18.21.0/atuin-aarch64-apple-darwin.tar.gz	c78ac159c89c38ee0b56eb6a11d9c0a7340de3a03b98fbbccd44f8e2d91e6e6e
+pay-respects-deb	0.9.0	linux	x86_64	https://github.com/iffse/pay-respects/releases/download/v0.9.0/pay-respects_0.9.0-1_amd64.deb	b54bd4d073656c5eb8f0a05c83b9c04ff26a38857a251d6b7665b0c9757e8c15
+pay-respects-deb	0.9.0	linux	aarch64	https://github.com/iffse/pay-respects/releases/download/v0.9.0/pay-respects_0.9.0-1_arm64.deb	d16d728031a11e93535b1ae255282114e1088d20c0fdabfa4e38e25b296ec8a8
+pay-respects-rpm	0.9.0	linux	x86_64	https://github.com/iffse/pay-respects/releases/download/v0.9.0/pay-respects-0.9.0-1.x86_64.rpm	11ce432870095411af97e46a8aa1272a1c9a34bdb3e2610614b588f699156553
+pay-respects-rpm	0.9.0	linux	aarch64	https://github.com/iffse/pay-respects/releases/download/v0.9.0/pay-respects-0.9.0-1.aarch64.rpm	1efa19611ff237a288ae2af19b7592bb59fd42350eb2a48fe3f1df18a2f0f4fa
