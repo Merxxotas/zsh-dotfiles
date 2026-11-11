@@ -213,10 +213,14 @@ Usage: vconv [options] <input_file(s)> <target_extension>
 Universal video transcoder with automatic GPU hardware acceleration
 (NVIDIA NVENC, AMD/Intel VA-API, Intel QSV, Apple VideoToolbox) and CPU fallback.
 
+Default Behavior:
+  GPU acceleration is detected and used AUTOMATICALLY (no flags needed).
+  If no GPU is present or if hardware encoding fails, it falls back to CPU automatically.
+
 Options:
   -f, --fast        Fast stream copy without re-encoding (container switch, 0% quality loss)
-  --cpu             Force CPU encoding (shows warning if video > 3 minutes)
-  --gpu             Force GPU encoding (fails if no GPU hardware encoder is available)
+  --gpu             Strict GPU mode: require GPU hardware encoding (fails instead of falling back to CPU)
+  --cpu             Force CPU mode: encode with CPU only (ignores GPU; warns if video > 3 minutes)
   --lossless        Mathematically lossless visual quality (-crf 0)
   -h, --help        Show this help message
 
@@ -225,10 +229,11 @@ Supported Output Formats:
   Legacy: avi (MPEG-4/XviD + MP3), ts (MPEG-TS), wmv (Windows Media Video)
 
 Examples:
-  vconv video.webm mp4           # Convert to MP4 with auto GPU acceleration
+  vconv video.webm mp4           # Normal use: auto-detects GPU and converts
   vconv *.webm mp4               # Batch convert all WebM files in directory
   vconv -f video.mkv mp4         # Fast stream copy without re-encoding
-  vconv --cpu video.webm mp4     # Force CPU encoding
+  vconv --gpu video.webm mp4     # Strict GPU: fail if GPU is unavailable
+  vconv --cpu video.webm mp4     # Force CPU encoding for benchmarking
   vconv --lossless clip.mkv mp4  # Lossless quality (-crf 0)
   vconv clip.mp4 avi             # Convert to legacy AVI format
 EOF

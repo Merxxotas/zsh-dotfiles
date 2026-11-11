@@ -10,7 +10,7 @@ The suite embeds robust, production-grade CLI tools for processing video, audio,
 Converts single or multiple videos between formats (`mp4`, `mkv`, `webm`, `avi`, `mov`, `ts`, `wmv`) with automatic hardware acceleration (GPU) and intelligent CPU fallback.
 
 ```bash
-# Convert a single video to high-quality MP4 using GPU hardware acceleration (5x-20x faster)
+# Convert video to MP4 (auto-detects GPU and accelerates automatically; no flags required)
 vconv recording.webm mp4
 
 # Batch convert all WebM files in current directory
@@ -19,7 +19,10 @@ vconv *.webm mp4
 # Fast container switch without re-encoding (-f for stream copy, 0% quality loss)
 vconv -f source.mkv mp4
 
-# Force CPU encoding (shows warning if video > 3 minutes)
+# Strict GPU mode: requires hardware encoding (fails if no GPU is available, no CPU fallback)
+vconv --gpu recording.webm mp4
+
+# Force CPU mode: forces CPU encoding for testing or benchmarking (warns if video > 3 minutes)
 vconv --cpu recording.webm mp4
 
 # Mathematically lossless encoding (-crf 0)
