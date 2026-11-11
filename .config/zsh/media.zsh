@@ -207,7 +207,7 @@ _vconv_transcode_h264() {
 }
 
 _vconv_usage() {
-  cat <<'EOF'
+  command cat <<'EOF'
 Usage: vconv [options] <input_file(s)> <target_extension>
 
 Universal video transcoder with automatic GPU hardware acceleration
