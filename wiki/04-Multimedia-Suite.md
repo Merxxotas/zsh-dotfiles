@@ -7,18 +7,42 @@ The suite embeds robust, production-grade CLI tools for processing video, audio,
 ## Commands Reference
 
 ### 1. `vconv` - Universal Video Transcoder & Batch Converter
-Converts single or multiple videos between formats (`mp4`, `mkv`, `webm`, `avi`, `mov`).
+Converts single or multiple videos between formats (`mp4`, `mkv`, `webm`, `avi`, `mov`, `ts`, `wmv`) with automatic hardware acceleration (GPU) and intelligent CPU fallback.
 
 ```bash
-# Convert a single video to high-quality MP4 (H.264 + AAC)
+# Convert a single video to high-quality MP4 using GPU hardware acceleration (5x-20x faster)
 vconv recording.webm mp4
 
 # Batch convert all WebM files in current directory
 vconv *.webm mp4
 
-# Fast container switch without re-encoding (-f for stream copy)
+# Fast container switch without re-encoding (-f for stream copy, 0% quality loss)
 vconv -f source.mkv mp4
+
+# Force CPU encoding (shows warning if video > 3 minutes)
+vconv --cpu recording.webm mp4
+
+# Mathematically lossless encoding (-crf 0)
+vconv --lossless archive.mkv mp4
+
+# Convert to legacy formats (e.g. AVI with MPEG-4/XviD + MP3 for old DVD/car players)
+vconv clip.mp4 avi
 ```
+
+#### Hardware Acceleration & Fallback Matrix
+
+`vconv` dynamically probes available hardware encoders without adding startup latency:
+
+| Engine | Hardware Support | Encoder | Flags / Presets |
+| :--- | :--- | :--- | :--- |
+| **VideoToolbox** | Apple Silicon (M1–M4) & macOS | `h264_videotoolbox` | `-q:v 60 -pix_fmt yuv420p` |
+| **NVENC** | NVIDIA GeForce / RTX / Quadro | `h264_nvenc` | `-preset p5 -cq 20 -pix_fmt yuv420p` |
+| **VA-API** | AMD Radeon & Intel on Linux (`/dev/dri/renderD*`) | `h264_vaapi` | `-vf format=nv12,hwupload -qp 20` |
+| **QSV** | Intel QuickSync Video | `h264_qsv` | `-global_quality 20 -pix_fmt yuv420p` |
+| **CPU Fallback** | Universal software fallback | `libx264` / `libvpx-vp9` | `-crf 18 -preset slow` (Visually lossless) |
+
+- **Automatic Fallback:** If GPU encoding fails during execution (unsupported profile, VRAM limits), `vconv` automatically retries with CPU (`libx264`).
+- **CPU Warning Threshold:** When encoding via CPU, `vconv` measures video duration via `ffprobe` and displays a warning only if the video exceeds 3 minutes (180s).
 
 ### 2. `vdl` - Universal Video Downloader
 Downloads videos with metadata and thumbnail integration from YouTube, Twitter/X, TikTok, Instagram, Reddit, and Twitch.
